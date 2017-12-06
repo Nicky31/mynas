@@ -4,11 +4,15 @@ apiService.$inject = ['$http', 'API_URL', 'Upload'];
 
 function apiService($http, API_URL, Upload) {
 
-	this.graphql = (datas) => $http.post(API_URL + 'graphql', JSON.stringify(datas), {
-		headers: {
-			'Content-Type': 'application/json'
-		}
-	});
+	this.graphql = (datas) => {
+		datas = { query: datas }
+		datas = { "query": "{ allFiles { id name description } }"}
+		$http.post(API_URL + 'graphql', JSON.stringify(datas), {
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		});
+	}
 
 	this.post = (path, datas) => $http.post(API_URL + path, JSON.stringify(datas), {
 		headers: {

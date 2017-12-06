@@ -15,6 +15,8 @@ import mapService from './services/mapService';
 import apiService from './services/api/apiService.js';
 import userApiService from './services/api/userApiService.js';
 import userMgrService from './services/entities/userMgrService.js';
+import fileApiService from './services/api/fileApiService.js';
+import fileMgrService from './services/entities/fileMgrService.js';
 import linker from './services/entities/lib/EntityManagerLinker'
 
 import SidebarCtrl from './controllers/SidebarCtrl.js'
@@ -32,6 +34,8 @@ app
 	.service('apiService', apiService)
 	.service('userApiService', userApiService)
 	.factory('userMgrService', userMgrService)
+	.service('fileApiService', fileApiService)
+	.factory('fileMgrService', fileMgrService)
 
 	.controller('HomeCtrl', HomeCtrl)
 	.controller('LoginCtrl', LoginCtrl)
@@ -45,10 +49,11 @@ app
 		delete $httpProvider.defaults.headers.common['X-Requested-With'];
 		$httpProvider.defaults.withCredentials = true;
 	})
-	.run(($rootScope, $cookies, userMgrService) => {
+	.run(($rootScope, $cookies, userMgrService, fileMgrService) => {
 		$rootScope.router = routes;
 		linker([
 			userMgrService,
+			fileMgrService
 		])
 	})
 	.run(AppInit);
