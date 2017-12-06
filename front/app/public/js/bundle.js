@@ -266,6 +266,7 @@ function SidebarCtrl($rootScope, $scope, $location) {
 			return $location.path('/');
 		} }];
 	$scope.baseWidgets = [];
+
 	$scope.pageLinks = [];
 	$scope.pageWidgets = [];
 
@@ -277,6 +278,11 @@ function SidebarCtrl($rootScope, $scope, $location) {
 			return $scope.pageWidgets = widgets;
 		}
 	};
+
+	$scope.$on('$routeChangeStart', function ($event, next, current) {
+		$scope.pageLinks = [];
+		$scope.pageWidgets = [];
+	});
 }
 
 },{}],10:[function(require,module,exports){
