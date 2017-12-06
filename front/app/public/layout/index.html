@@ -16,7 +16,7 @@
     <meta name="author" content="Łukasz Holeczek">
     <link rel="shortcut icon" href="img/favicon.png">
 
-    <title>CoreUI - Open Source Bootstrap Admin Template</title>
+    <title>OwnSpace</title>
 
     <!-- Main styles for this application -->
     <link href="css/style.css" rel="stylesheet">
@@ -64,17 +64,17 @@
                 {{global.title}}
                 <!-- Breadcrumb Menu-->
                 <li class="breadcrumb-menu">
-                    <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+<!--                     <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
                         <a class="btn btn-secondary" href="#"><i class="icon-speech"></i></a>
                         <a class="btn btn-secondary" ui-sref="app.main"><i class="icon-graph"></i> &nbsp;Dashboard</a>
                         <a class="btn btn-secondary" ui-sref="app.main"><i class="icon-settings"></i> &nbsp;Settings</a>
-                    </div>
+                    </div> -->
                 </li>
 
             </ol>
 
             <div class="container-fluid">
-                <ui-view></ui-view>
+                <div ng-view></div>
             </div>
             <!-- /.conainer-fluid -->
         </main>

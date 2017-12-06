@@ -10,6 +10,18 @@ const router = new Router(function(datas) {
 			templateUrl: 'views/home/index.html',
 			controller: 'HomeCtrl'
 		})
+		.route('/files', {
+			templateUrl: 'views/files/index.html',
+			controller: 'FilesCtrl'
+		})
+		.route('/agenda', {
+			templateUrl: 'views/agenda/index.html',
+			controller: 'AgendaCtrl'
+		})
+		.route('/notes', {
+			templateUrl: 'views/notes/index.html',
+			controller: 'NotesCtrl'
+		})
 		.route('/403', {templateUrl: 'views/member403.html'})
 		.set404View('views/404.html');
 });

@@ -17,8 +17,12 @@ import userApiService from './services/api/userApiService.js';
 import userMgrService from './services/entities/userMgrService.js';
 import linker from './services/entities/lib/EntityManagerLinker'
 
+import SidebarCtrl from './controllers/SidebarCtrl.js'
 import HomeCtrl from './controllers/HomeCtrl.js'
 import LoginCtrl from './controllers/LoginCtrl.js'
+import FilesCtrl from './controllers/FilesCtrl.js'
+import AgendaCtrl from './controllers/AgendaCtrl.js'
+import NotesCtrl from './controllers/NotesCtrl.js'
 
 var app = angular.module('app', ['ngRoute', 'ngCookies', 'ngFileUpload', 'angular-async-await']);
 constantsLoader(app);
@@ -31,6 +35,10 @@ app
 
 	.controller('HomeCtrl', HomeCtrl)
 	.controller('LoginCtrl', LoginCtrl)
+	.controller('FilesCtrl', FilesCtrl)
+	.controller('AgendaCtrl', AgendaCtrl)
+	.controller('NotesCtrl', NotesCtrl)
+	.controller('SidebarCtrl', SidebarCtrl)
 
 	.config(($routeProvider, $httpProvider) => {
 		routes.config($routeProvider);

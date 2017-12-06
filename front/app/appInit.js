@@ -17,6 +17,7 @@ function AppInit($rootScope, utilService, userMgrService, $async) {
 	if (user) {
 		$rootScope.router.setData('user', user);
 		$rootScope.global.user = user;
+		console.log('user = ' + JSON.stringify(user))
 	}
 };
 

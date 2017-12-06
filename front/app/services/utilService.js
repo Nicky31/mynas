@@ -10,7 +10,6 @@ function utilService($http, $cookies, userMgrService, userApiService) {
 
 	function getStoredSession()  {
 		var user = $cookies.getObject('user');
-		console.log('#> user ' + JSON.stringify(user))
 		if (!user)
 			return false;
 		delete user.__model

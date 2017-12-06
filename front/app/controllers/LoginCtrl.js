@@ -11,9 +11,10 @@ export default function LoginCtrl($rootScope, $scope, $async, userMgrService, ut
 	$scope.onLogin = () => {
 		$async(async function () {
 			try {
-				const user = await userMgrService.login($scope.form.email, $scope.form.password)
-				console.log('passed')				
-				utilService.storeSession('user');
+				const user = await userMgrService.login($scope.form.email, $scope.form.password)			
+				if (!user || !user.success)
+					throw ({error: 'bad creds'})
+				utilService.storeSession(user.entity);
 				window.location.reload()
 			} catch (error) {
 				console.log('login error:  ' + JSON.stringify(error))
