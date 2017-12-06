@@ -83,6 +83,11 @@ function AppInit($rootScope, utilService, userMgrService, $async) {
 		user: false
 	};
 
+	$rootScope.logout = function () {
+		utilService.destroySession();
+		window.location.reload();
+	};
+
 	// My user session
 	var user = utilService.getStoredSession();
 	if (user) {
@@ -138,11 +143,12 @@ exports.default = LoginCtrl;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-LoginCtrl.$inject = ['$rootScope', '$scope', '$async', 'userMgrService'];
-function LoginCtrl($rootScope, $scope, $async, userMgrService) {
+LoginCtrl.$inject = ['$rootScope', '$scope', '$async', 'userMgrService', 'utilService'];
+function LoginCtrl($rootScope, $scope, $async, userMgrService, utilService) {
 	$scope.form = {
 		email: '',
-		password: ''
+		password: '',
+		error: ''
 	};
 	console.log('refresh ' + (0, _stringify2.default)($scope.form));
 	$scope.onLogin = function () {
@@ -160,21 +166,24 @@ function LoginCtrl($rootScope, $scope, $async, userMgrService) {
 							user = _context.sent;
 
 							console.log('passed');
-							_context.next = 10;
+							utilService.storeSession('user');
+							window.location.reload();
+							_context.next = 13;
 							break;
 
-						case 7:
-							_context.prev = 7;
+						case 9:
+							_context.prev = 9;
 							_context.t0 = _context['catch'](0);
 
 							console.log('login error:  ' + (0, _stringify2.default)(_context.t0));
+							$scope.form.error = 'Mauvais identifiants';
 
-						case 10:
+						case 13:
 						case 'end':
 							return _context.stop();
 					}
 				}
-			}, _callee, this, [[0, 7]]);
+			}, _callee, this, [[0, 9]]);
 		})))();
 	};
 }
@@ -1031,9 +1040,9 @@ function utilService($http, $cookies, userMgrService, userApiService) {
 	}
 
 	function destroySession() {
-		userApiService.logout();
 		userMgrService.myUser = {};
 		$cookies.remove('user');
+		$cookies.remove('token');
 	}
 
 	function storeSession(user) {

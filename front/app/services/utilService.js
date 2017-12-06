@@ -19,9 +19,9 @@ function utilService($http, $cookies, userMgrService, userApiService) {
 	}
 
 	function destroySession() {
-		userApiService.logout();
 		userMgrService.myUser = {};
 		$cookies.remove('user');
+		$cookies.remove('token');
 	}
 
 	function storeSession(user) {

@@ -19,6 +19,7 @@ module.exports = {
         password: data.credentials.password
       }
       const response = await Users.insert(newUser)
+      delete newUser.password
       return Object.assign({id: response.insertedIds[0]}, newUser)
     }
   },

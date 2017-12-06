@@ -12,7 +12,7 @@ app.use(express.static(env.PATH.APP_PUBLIC));
 
 app.all('*', (req, res) => {
 	res.status(200);
-	const endpoint = req.cookies.token ? 'layout/index.html' : 'layout/login.html'
+	const endpoint = req.cookies.user ? 'layout/index.html' : 'layout/login.html'
 	res.sendFile(path.join(env.PATH.APP_PUBLIC, endpoint));
 });
 

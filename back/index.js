@@ -32,7 +32,7 @@ const connectMongo = require('./mongo-connector');
 		if (!req.body || !req.body.email || !req.body.password)
 			return res.json({error: 'Auth requires email and password !'})
   		const user = await mongo.Users.findOne({email: req.body.email})
-  		if (req.body.password == user.password) {
+  		if (user && req.body.password == user.password) {
   			delete user.password
   			const expiresIn = (60 * 60 * 24 * 180)
   			res.cookie('token', jwt.sign(user, config.auth_secret, { expiresIn }), { maxAge: (expiresIn * 1000), httpOnly: true})

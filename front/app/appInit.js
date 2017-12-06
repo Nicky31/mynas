@@ -7,6 +7,11 @@ function AppInit($rootScope, utilService, userMgrService, $async) {
 		user: false
 	};
 
+	$rootScope.logout = () => {
+		utilService.destroySession()
+		window.location.reload()
+	}
+
 	// My user session
 	var user = utilService.getStoredSession()
 	if (user) {
