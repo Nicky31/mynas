@@ -70,8 +70,9 @@ function EntityModel(name, attrs, config = {}) {
 		}
 		if (attr.link && value && !value.__model) {
 			value = this.constructLinkedEntity(value, key)
-			if (!value)
+			if (!value) {
 				return null
+			}
 			if (attr.link.spread_obj) {
 				value.__model.bindHelpers(out)
 				delete value.__model //TODO: pas générique

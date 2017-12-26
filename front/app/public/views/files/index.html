@@ -1,7 +1,12 @@
 <table class="table table-filter">
   <thead>
     <tr style="color: #A1A1A1;">
-        <td> <input type="checkbox" id="checkbox1" /> </td>
+        <td>
+          <div class="ckbox">
+            <input type="checkbox" class="fileCkb" id="ckbAll" />
+            <label for="ckbAll" ng-click="toggleSelect(true); $event.preventDefault();"></label>
+          </div>
+        </td>
         <td></td> <!-- star -->
         <td width="32px"></td> <!-- icon -->
         <td width="50%">Nom</td>
@@ -12,22 +17,22 @@
     </tr>
   </thead>
   <tbody>
-    <tr ng-repeat="file in files" data-status="pagado" ng-class="{'selected': selected.includes(file.id)}"> <!--class="selected"-->
+    <tr ng-repeat="($idx, file) in files" data-status="pagado" ng-class="{'selected': selected.includes(file.id)}"> 
       <td>
         <div class="ckbox">
-          <input type="checkbox" id="checkbox1">
-          <label for="checkbox1"></label>
+          <input type="checkbox" class="fileCkb" id="ckb{{$idx}}"/>
+          <label for="ckb{{$idx}}" ng-click="toggleSelect(file);"></label>
         </div>
       </td>
 
       <td>
-        <a class="star" ng-class="{'selected': selected.includes(file.id)}"> <!-- class : star-checked -->
-          <i class="fa fa-star-o fa-lg"></i>
+        <a class="star" ng-class="{'star-checked': file.favourite}" ng-click="toggleFavourite(file)">
+          <i class="fa fa-lg" ng-class="{'fa-star': file.favourite, 'fa-star-o': !file.favourite}"></i>
         </a>
       </td>
 
       <td>
-          <img ng-src="{{file.icon}}" class="media-photo" />
+          <i ng-class="file.mimeFaClassName" style="font-size: 20px;" />
       </td>
 
       <td>
@@ -37,7 +42,7 @@
       <td></td>
       <td></td>
       <td>{{file.size}}</td>
-      <td>{{file.formatedDate}}</td>
+      <td>{{file.humanUpdatedAt}}</td>
     </tr>
   </tbody>
 </table>
