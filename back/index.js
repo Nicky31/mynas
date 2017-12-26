@@ -21,12 +21,14 @@ const connectMongo = require('./mongo-connector');
 		getToken: req => req.cookies.token,
 	}));
 
-	app.use(function(req, res, next) {
-	  res.header("Access-Control-Allow-Origin", "http://localhost:2000");
-	  res.header("Access-Control-Allow-Credentials", "true");
-	  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-	  next();
-	});
+	const corsOptions = {
+		origin: 'http://localhost:2000',
+		credentials: true,
+  		"methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+  		"allowedHeaders": "Content-Type,Accept",
+  		"preflightContinue": false,
+	}
+	app.use(cors(corsOptions))
 
 	app.use('/auth', async (req, res) => {
 		if (!req.body || !req.body.email || !req.body.password)
