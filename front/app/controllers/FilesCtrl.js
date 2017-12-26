@@ -1,16 +1,19 @@
 'use strict';
 
 FilesCtrl.$inject = ['$rootScope', '$scope']
-export default function FilesCtrl($rootScope, $scope) {
-	if (!$scope.viewMode) {
-		$scope.viewMode = 'all'
-		$rootScope.global.sidebar.setLinks([
-			{iconClassname: 'fa fa-folder', name: 'Tous les fichiers', action: () => $scope.viewMode = 'all'},
-		])
+const sidebarWidgets = [
+	{include: './views/files/sidebarWidgets.html'}
+]
 
-		$scope.selected = []
-		$scope.files = $rootScope.global.allFiles
-	}
+export default function FilesCtrl($rootScope, $scope) {
+	$scope.viewMode = 'all'
+	$rootScope.global.sidebar.setLinks([
+		{iconClassname: 'fa fa-folder', name: 'Tous les fichiers', action: () => $scope.viewMode = 'all'},
+	])
+	$rootScope.global.sidebar.setWidgets(sidebarWidgets)
+
+	$scope.selected = []
+	$scope.files = $rootScope.global.allFiles
 
 	$scope.toggleSelect = file => {
 		if (file == true) {
@@ -29,6 +32,19 @@ export default function FilesCtrl($rootScope, $scope) {
 
 	$scope.toggleFavourite = file => {
 		file.favourite = !file.favourite
+	}
+
+
+	/*
+	 * Widgets 
+	 */
+	$scope.newFolder = {
+		name: false
+	}
+
+	$scope.submitNewFolder = () => {
+		console.log('creating folder ' + $scope.newFolder.name)	
+		$scope.newFolder.name = ''
 	}
 }
 

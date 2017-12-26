@@ -201,20 +201,19 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = FilesCtrl;
 FilesCtrl.$inject = ['$rootScope', '$scope'];
-function FilesCtrl($rootScope, $scope) {
-	if (!$scope.viewMode) {
-		$scope.viewMode = 'all';
-		$rootScope.global.sidebar.setLinks([{ iconClassname: 'fa fa-folder', name: 'Tous les fichiers', action: function action() {
-				return $scope.viewMode = 'all';
-			} }]);
+var sidebarWidgets = [{ include: './views/files/sidebarWidgets.html' }];
 
-		var icon = "https://s3.amazonaws.com/uifaces/faces/twitter/fffabs/128.jpg";
-		$scope.selected = [];
-		$scope.files = $rootScope.global.allFiles;
-	}
+function FilesCtrl($rootScope, $scope) {
+	$scope.viewMode = 'all';
+	$rootScope.global.sidebar.setLinks([{ iconClassname: 'fa fa-folder', name: 'Tous les fichiers', action: function action() {
+			return $scope.viewMode = 'all';
+		} }]);
+	$rootScope.global.sidebar.setWidgets(sidebarWidgets);
+
+	$scope.selected = [];
+	$scope.files = $rootScope.global.allFiles;
 
 	$scope.toggleSelect = function (file) {
-		console.log('toogggllle');
 		if (file == true) {
 			var checked = $scope.selected.length == 0;
 			$scope.selected = checked ? $scope.files.map(function (cur) {
@@ -237,6 +236,18 @@ function FilesCtrl($rootScope, $scope) {
 
 	$scope.toggleFavourite = function (file) {
 		file.favourite = !file.favourite;
+	};
+
+	/*
+  * Widgets 
+  */
+	$scope.newFolder = {
+		name: false
+	};
+
+	$scope.submitNewFolder = function () {
+		console.log('creating folder ' + $scope.newFolder.name);
+		$scope.newFolder.name = '';
 	};
 }
 

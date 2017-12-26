@@ -11,6 +11,11 @@
             <li class="nav-title">
                 Tools
             </li>
+
+            <div ng-repeat="widget in pageWidgets" ng-include="widget.include"></div>
+
+            <li class="divider"></li>
+
             <div ng-if="pageLinks.length">
                 <li class="nav-item" ng-repeat="link in pageLinks">
                     <a class="nav-link" ng-click="link.action()" style="cursor: pointer;"><i ng-class="link.iconClassname"></i>{{link.name}}</a>

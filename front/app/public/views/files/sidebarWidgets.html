@@ -1,0 +1,26 @@
+<li class="nav-item nav-dropdown" ng-class="{'open': open}" style="cursor: pointer;"
+	ng-init="open = false" ng-click="open = !open" ng-controller="FilesCtrl"
+>
+	<a class="nav-link nav-dropdown-toggle"> <i class="glyphicon glyphicon-plus"></i> Nouveau ...</a>
+	<ul class="nav-dropdown-items" ng-click="$event.stopPropagation();">
+
+		<li class="nav-item">
+			<a class="nav-link" ng-if="!newFolder.name" ng-click="newFolder.name = 'Nom du dossier'">
+				&nbsp;&nbsp;&nbsp; <i class="fa fa-folder"></i> Dossier
+			</a>
+			<a ng-if="newFolder.name">
+				<form method="POST" ng-submit="submitNewFolder()">
+					<div class="form-group" style="color: black; margin-left: 15px; margin-right: 5px; margin-top: 4px; margin-bottom: 4px;">
+						<input type="text" placeholder="Nom du dossier" class="form-control" ng-model="newFolder.name"/>
+					</div>
+				</form>
+			</a>
+		</li>
+
+		<li class="nav-item">
+			<a class="nav-link">
+				&nbsp;&nbsp;&nbsp;<i class="fa fa-file"></i> Fichier texte
+			</a>
+		</li>
+	</ul>
+</li>
