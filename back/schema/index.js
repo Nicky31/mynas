@@ -16,7 +16,11 @@ const typeDefs = `
 	type File {
     	id: ID!
     	name: String!
-    	description: String!
+    	path: String!
+      mime: String!
+      folderId: ID
+      size: Int!
+      updatedAt: String!
   	}
 
   	type User {

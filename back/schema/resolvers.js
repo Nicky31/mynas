@@ -1,26 +1,18 @@
 var files = []
 module.exports = {
   Query: {
-    allFiles: async (root, data, {mongo: {Files}}) => { //{mongo: {Files}}
-      return await Files.find({}).toArray()
+    allFiles: async (root, data, {services: {FileService}}) => {
+      return FileService.getFilesIn()
     },
   },
 
   Mutation: {
-    createFile: async (root, data, {mongo: {Files}}) => {
-      const response = await Files.insert(data)
-      return Object.assign({id: response.insertedIds[0]}, data)
+    createFile: async (root, data, {mongo: {Files}, services: {FileService}}) => {
+      return FileService.createFile(data)
     },
 
-    createUser: async (root, data, {mongo: {Users}}) => {
-      const newUser = {
-        name: data.name,
-        email: data.credentials.email,
-        password: data.credentials.password
-      }
-      const response = await Users.insert(newUser)
-      delete newUser.password
-      return Object.assign({id: response.insertedIds[0]}, newUser)
+    createUser: async (root, data, {mongo: {Users}, services: {UserService}}) => {
+      return UserService.createUser(data)
     }
   },
 

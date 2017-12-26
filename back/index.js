@@ -7,11 +7,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const { graphqlExpress, graphiqlExpress } = require('apollo-server-express');
 const schema = require('./schema');
-
+const Services = require('./services').default
 const connectMongo = require('./mongo-connector');
 
 (async function() {
-	mongo = await connectMongo()
+	var mongo = await connectMongo()
+	const services = Services(mongo)
 	var app = express();
 	app.use(bodyParser())
 	app.use(cookieParser());
@@ -46,7 +47,7 @@ const connectMongo = require('./mongo-connector');
   	const buildOptions = async (req, res) => {
     	const user = req.user
     	return {
-      		context: {mongo, user}, // This context object is passed to all resolvers.
+      		context: {mongo, user, services}, // This context object is passed to all resolvers.
       		schema,
     	};
   	};
