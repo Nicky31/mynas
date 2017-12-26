@@ -15,11 +15,12 @@ function fileApiService(apiService, $http) {
     }`)
     .then(ret => {
       console.log('allFiles =  ' + JSON.stringify(ret))
-      if (ret.data && ret.data.allFiles)
+      if (ret.allFiles) {
         return ({
           success: true,
-          entity: ret.data.allFiles
+          entity: ret.allFiles
         })
+      }
       return false
     })
   }

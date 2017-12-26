@@ -6,12 +6,17 @@ function apiService($http, API_URL, Upload) {
 
 	this.graphql = (datas) => {
 		datas = { query: datas }
-		datas = { "query": "{ allFiles { id name description } }"}
-		$http.post(API_URL + 'graphql', JSON.stringify(datas), {
+		return $http.post(API_URL + 'graphql', JSON.stringify(datas), {
+			withCredentials: true,
 			headers: {
 				'Content-Type': 'application/json'
 			}
-		});
+		})
+		.then(ret => {
+			if (ret.status != 200)
+				throw {error: 'Bad status', resp: ret}
+			return ret.data.data
+		})
 	}
 
 	this.post = (path, datas) => $http.post(API_URL + path, JSON.stringify(datas), {

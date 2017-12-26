@@ -86,7 +86,7 @@ export default function EntityManager(entityModel, backendLinks, customMethods) 
 		return (Promise.reject(false))
 	};
 
-	this.fetchAll = () => {
+	this.fetchAll = async () => {
 		return this.backend.fetchAll()
 		.then(result => {
 			if (result.success && result.entity) {
