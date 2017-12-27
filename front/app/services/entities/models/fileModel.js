@@ -17,6 +17,19 @@ function getMimeFaClass(mime) {
 	return faClassName('o')
 }
 
+function getHumanSize(bytes) {
+	const units = {
+		'GB': 1000000000,
+		'MB': 1000000,
+		'KB': 1000
+	}
+	for (var cur in units) {
+		if (bytes >= units[cur])
+			return ((bytes / units[cur]).toFixed(2)) + ' ' + cur
+	}
+	return bytes + ' B'
+}
+
 const config = {
 	updateCallbacks: {
 		updatedAt: function(updatedAt) {
@@ -26,6 +39,10 @@ const config = {
 
 		mime: function(mime) {
 			this.mimeFaClassName = getMimeFaClass(mime)
+		},
+
+		size: function(size) {
+			this.humanSize = getHumanSize(size)
 		}
 	},
 
@@ -47,6 +64,19 @@ export default new EntityModel('File', {
 
 	size: {},
 
-	updatedAt: {}
+	updatedAt: {},
+
+	// Display utils
+	humanUpdatedAt: {
+		default: ''
+	},
+
+	mimeFaClassName: {
+		default: 'fa fa-file-o'
+	},
+
+	humanSize: {
+		default: ''
+	}
 
 }, config);

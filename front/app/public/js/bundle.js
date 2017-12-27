@@ -1205,6 +1205,18 @@ function getMimeFaClass(mime) {
 	return faClassName('o');
 }
 
+function getHumanSize(bytes) {
+	var units = {
+		'GB': 1000000000,
+		'MB': 1000000,
+		'KB': 1000
+	};
+	for (var cur in units) {
+		if (bytes >= units[cur]) return (bytes / units[cur]).toFixed(2) + ' ' + cur;
+	}
+	return bytes + ' B';
+}
+
 var config = {
 	updateCallbacks: {
 		updatedAt: function updatedAt(_updatedAt) {
@@ -1214,6 +1226,10 @@ var config = {
 
 		mime: function mime(_mime) {
 			this.mimeFaClassName = getMimeFaClass(_mime);
+		},
+
+		size: function size(_size) {
+			this.humanSize = getHumanSize(_size);
 		}
 	},
 
@@ -1233,7 +1249,20 @@ exports.default = new _EntityModel2.default('File', {
 
 	size: {},
 
-	updatedAt: {}
+	updatedAt: {},
+
+	// Display utils
+	humanUpdatedAt: {
+		default: ''
+	},
+
+	mimeFaClassName: {
+		default: 'fa fa-file-o'
+	},
+
+	humanSize: {
+		default: ''
+	}
 
 }, config);
 
