@@ -5,7 +5,6 @@ function AppInit($rootScope, utilService, userMgrService, fileMgrService, $async
 	$rootScope.global = {
 		title: 'DataHome',
 		user: false,
-		allFiles: []
 	};
 
 	$rootScope.logout = () => {
@@ -24,8 +23,7 @@ function AppInit($rootScope, utilService, userMgrService, fileMgrService, $async
 	$async(async function() {
 		try {
 			var filesReq = await fileMgrService.fetchAll()
-			$rootScope.global.allFiles = filesReq.entity
-			console.log('retrieved files = '+ JSON.stringify($rootScope.global.allFiles))
+			$rootScope.allFiles = filesReq.entity
 		} catch (error) {
 			console.log('error on fetch files : ' + JSON.stringify(error))
 		}

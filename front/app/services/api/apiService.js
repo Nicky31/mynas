@@ -33,6 +33,10 @@ function apiService($http, API_URL, Upload) {
 	      	data: datas
 	    })
 	};
+
+	this.graphqlUpload = (query) => {
+		return this.postFile('graphql', query)
+	}
 }
 
 export default apiService;

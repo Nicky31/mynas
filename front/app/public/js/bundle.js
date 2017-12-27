@@ -119,8 +119,7 @@ AppInit.$inject = ['$rootScope', 'utilService', 'userMgrService', 'fileMgrServic
 function AppInit($rootScope, utilService, userMgrService, fileMgrService, $async) {
 	$rootScope.global = {
 		title: 'DataHome',
-		user: false,
-		allFiles: []
+		user: false
 	};
 
 	$rootScope.logout = function () {
@@ -149,23 +148,22 @@ function AppInit($rootScope, utilService, userMgrService, fileMgrService, $async
 					case 3:
 						filesReq = _context.sent;
 
-						$rootScope.global.allFiles = filesReq.entity;
-						console.log('retrieved files = ' + (0, _stringify2.default)($rootScope.global.allFiles));
-						_context.next = 11;
+						$rootScope.allFiles = filesReq.entity;
+						_context.next = 10;
 						break;
 
-					case 8:
-						_context.prev = 8;
+					case 7:
+						_context.prev = 7;
 						_context.t0 = _context['catch'](0);
 
 						console.log('error on fetch files : ' + (0, _stringify2.default)(_context.t0));
 
-					case 11:
+					case 10:
 					case 'end':
 						return _context.stop();
 				}
 			}
-		}, _callee, this, [[0, 8]]);
+		}, _callee, this, [[0, 7]]);
 	})))();
 };
 
@@ -199,11 +197,29 @@ function NotesCtrl($rootScope, $scope) {}
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _regenerator = require('babel-runtime/regenerator');
+
+var _regenerator2 = _interopRequireDefault(_regenerator);
+
+var _stringify = require('babel-runtime/core-js/json/stringify');
+
+var _stringify2 = _interopRequireDefault(_stringify);
+
+var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
+
+var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
+
 exports.default = FilesCtrl;
-FilesCtrl.$inject = ['$rootScope', '$scope'];
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+FilesCtrl.$inject = ['$rootScope', '$scope', 'fileMgrService', '$async'];
 var sidebarWidgets = [{ include: './views/files/sidebarWidgets.html' }];
 
-function FilesCtrl($rootScope, $scope) {
+function FilesCtrl($rootScope, $scope, fileMgrService, $async) {
+	var _this = this;
+
 	$scope.viewMode = 'all';
 	$rootScope.global.sidebar.setLinks([{ iconClassname: 'fa fa-folder', name: 'Tous les fichiers', action: function action() {
 			return $scope.viewMode = 'all';
@@ -211,7 +227,10 @@ function FilesCtrl($rootScope, $scope) {
 	$rootScope.global.sidebar.setWidgets(sidebarWidgets);
 
 	$scope.selected = [];
-	$scope.files = $rootScope.global.allFiles;
+	$scope.files = [];
+	$rootScope.$watch('allFiles', function (allFiles) {
+		refreshFiles();
+	});
 
 	$scope.toggleSelect = function (file) {
 		if (file == true) {
@@ -238,6 +257,10 @@ function FilesCtrl($rootScope, $scope) {
 		file.favourite = !file.favourite;
 	};
 
+	function refreshFiles() {
+		$scope.files = $rootScope.allFiles;
+	}
+
 	/*
   * Widgets 
   */
@@ -249,9 +272,65 @@ function FilesCtrl($rootScope, $scope) {
 		console.log('creating folder ' + $scope.newFolder.name);
 		$scope.newFolder.name = '';
 	};
+
+	$scope.openUploadWindow = function () {
+		return document.getElementById('uploadFileForm').click();
+	};
+
+	$scope.uploadFile = function () {
+		var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(file, errFiles) {
+			return _regenerator2.default.wrap(function _callee2$(_context2) {
+				while (1) {
+					switch (_context2.prev = _context2.next) {
+						case 0:
+							if (file && (!errFiles || !errFiles.length)) {
+								$async((0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee() {
+									var upload;
+									return _regenerator2.default.wrap(function _callee$(_context) {
+										while (1) {
+											switch (_context.prev = _context.next) {
+												case 0:
+													_context.prev = 0;
+													_context.next = 3;
+													return fileMgrService.upload(file);
+
+												case 3:
+													upload = _context.sent;
+
+													$rootScope.allFiles = fileMgrService.worker.findAll();
+													_context.next = 10;
+													break;
+
+												case 7:
+													_context.prev = 7;
+													_context.t0 = _context['catch'](0);
+
+													console.log('got error :' + (0, _stringify2.default)(_context.t0));
+
+												case 10:
+												case 'end':
+													return _context.stop();
+											}
+										}
+									}, _callee, this, [[0, 7]]);
+								})))();
+							}
+
+						case 1:
+						case 'end':
+							return _context2.stop();
+					}
+				}
+			}, _callee2, _this);
+		}));
+
+		return function (_x, _x2) {
+			return _ref.apply(this, arguments);
+		};
+	}();
 }
 
-},{}],6:[function(require,module,exports){
+},{"babel-runtime/core-js/json/stringify":32,"babel-runtime/helpers/asyncToGenerator":39,"babel-runtime/regenerator":44}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -527,6 +606,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 apiService.$inject = ['$http', 'API_URL', 'Upload'];
 
 function apiService($http, API_URL, Upload) {
+	var _this = this;
 
 	this.graphql = function (datas) {
 		datas = { query: datas };
@@ -557,6 +637,10 @@ function apiService($http, API_URL, Upload) {
 			data: datas
 		});
 	};
+
+	this.graphqlUpload = function (query) {
+		return _this.postFile('graphql', query);
+	};
 }
 
 exports.default = apiService;
@@ -572,10 +656,6 @@ var _stringify = require('babel-runtime/core-js/json/stringify');
 
 var _stringify2 = _interopRequireDefault(_stringify);
 
-var _promise = require('babel-runtime/core-js/promise');
-
-var _promise2 = _interopRequireDefault(_promise);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 fileApiService.$inject = ['apiService', '$http'];
@@ -583,11 +663,11 @@ var files = [{ id: '0', favourite: false, name: 'monimage.jpeg', mime: 'mime', s
 
 function fileApiService(apiService, $http) {
   this.fetchAllFiles = fetchAllFiles;
+  this.singleUpload = singleUpload;
 
   function fetchAllFiles() {
-    return _promise2.default.resolve({ success: true, entity: files });
-    return apiService.graphql('{\n      allFiles {\n        id\n        name\n        description\n      }\n    }').then(function (ret) {
-      console.log('allFiles =  ' + (0, _stringify2.default)(ret));
+    // return Promise.resolve({success: true, entity: files})
+    return apiService.graphql('{\n      allFiles {\n        id\n        filename\n        filepath\n        mime\n        folderId\n        size\n        updatedAt\n      }\n    }').then(function (ret) {
       if (ret.allFiles) {
         return {
           success: true,
@@ -597,11 +677,27 @@ function fileApiService(apiService, $http) {
       return false;
     });
   }
+
+  function singleUpload(file, folderId) {
+    return apiService.postFile('upload', {
+      folderId: folderId,
+      file: file
+    }).then(function (ret) {
+      if (ret.data) {
+        return {
+          success: true,
+          entity: ret.data.file
+        };
+      }
+      console.log('error : ' + (0, _stringify2.default)(ret));
+      return { error: ret };
+    });
+  }
 }
 
 exports.default = fileApiService;
 
-},{"babel-runtime/core-js/json/stringify":32,"babel-runtime/core-js/promise":36}],14:[function(require,module,exports){
+},{"babel-runtime/core-js/json/stringify":32}],14:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -667,7 +763,18 @@ function fileMgrService(fileApiService) {
 		insert: function insert(entity) {},
 
 		delete: function _delete(id) {}
-	}, {});
+	}, {
+		upload: function upload(file) {
+			var _this = this;
+
+			return fileApiService.singleUpload(file).then(function (ret) {
+				if (ret.success) {
+					ret.entity = _this.worker.append(ret.entity);
+				}
+				return ret;
+			});
+		}
+	});
 }
 
 exports.default = fileMgrService;
@@ -717,7 +824,9 @@ function Worker(entities, model) {
 		return model.hydrateEntity(datas, model.getDefaultValues());
 	};
 
-	this.findAll = function (query) {
+	this.findAll = function () {
+		var query = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
 		var attrs = (0, _keys2.default)(query);
 		return entities.filter(function (cur) {
 			return attrs.every(function (attr) {
@@ -1099,7 +1208,8 @@ function getMimeFaClass(mime) {
 var config = {
 	updateCallbacks: {
 		updatedAt: function updatedAt(_updatedAt) {
-			this.humanUpdatedAt = (0, _moment2.default)(_updatedAt).fromNow();
+			var iso = new Date(_updatedAt).toISOString();
+			this.humanUpdatedAt = (0, _moment2.default)(iso).fromNow();
 		},
 
 		mime: function mime(_mime) {
@@ -1113,7 +1223,11 @@ var config = {
 exports.default = new _EntityModel2.default('File', {
 	id: {},
 
-	name: {},
+	filename: {},
+
+	filepath: {},
+
+	folderId: {},
 
 	mime: {},
 

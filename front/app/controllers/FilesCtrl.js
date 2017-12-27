@@ -1,11 +1,11 @@
 'use strict';
 
-FilesCtrl.$inject = ['$rootScope', '$scope']
+FilesCtrl.$inject = ['$rootScope', '$scope', 'fileMgrService', '$async']
 const sidebarWidgets = [
 	{include: './views/files/sidebarWidgets.html'}
 ]
 
-export default function FilesCtrl($rootScope, $scope) {
+export default function FilesCtrl($rootScope, $scope, fileMgrService, $async) {
 	$scope.viewMode = 'all'
 	$rootScope.global.sidebar.setLinks([
 		{iconClassname: 'fa fa-folder', name: 'Tous les fichiers', action: () => $scope.viewMode = 'all'},
@@ -13,7 +13,10 @@ export default function FilesCtrl($rootScope, $scope) {
 	$rootScope.global.sidebar.setWidgets(sidebarWidgets)
 
 	$scope.selected = []
-	$scope.files = $rootScope.global.allFiles
+	$scope.files = []
+	$rootScope.$watch('allFiles', allFiles => {
+		refreshFiles()
+	})
 
 	$scope.toggleSelect = file => {
 		if (file == true) {
@@ -34,6 +37,9 @@ export default function FilesCtrl($rootScope, $scope) {
 		file.favourite = !file.favourite
 	}
 
+	function refreshFiles() {
+		$scope.files = $rootScope.allFiles
+	}
 
 	/*
 	 * Widgets 
@@ -45,6 +51,21 @@ export default function FilesCtrl($rootScope, $scope) {
 	$scope.submitNewFolder = () => {
 		console.log('creating folder ' + $scope.newFolder.name)	
 		$scope.newFolder.name = ''
+	}
+
+	$scope.openUploadWindow = () => document.getElementById('uploadFileForm').click()
+
+	$scope.uploadFile = async (file, errFiles) => {
+	  	if (file && (!errFiles || !errFiles.length)) {
+			$async(async function() {
+				try {
+					const upload = await fileMgrService.upload(file)
+					$rootScope.allFiles = fileMgrService.worker.findAll()
+				} catch (error) {
+					console.log('got error :' + JSON.stringify(error))
+				}
+			})();
+		}
 	}
 }
 

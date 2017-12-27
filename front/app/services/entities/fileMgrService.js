@@ -26,7 +26,15 @@ function fileMgrService(fileApiService) {
 		}
 	},
 	{
-
+		upload: function(file) {
+			return fileApiService.singleUpload(file)
+			.then(ret => {
+				if (ret.success) {
+					ret.entity = this.worker.append(ret.entity)
+				}
+				return ret
+			})
+		}
 	});
 }
 

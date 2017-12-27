@@ -20,7 +20,8 @@ function getMimeFaClass(mime) {
 const config = {
 	updateCallbacks: {
 		updatedAt: function(updatedAt) {
-			this.humanUpdatedAt = moment(updatedAt).fromNow()
+			const iso = new Date(updatedAt).toISOString()
+			this.humanUpdatedAt = moment(iso).fromNow()
 		},
 
 		mime: function(mime) {
@@ -36,8 +37,12 @@ const config = {
 export default new EntityModel('File', {
 	id: {},
 
-	name: {},
+	filename: {},
 
+	filepath: {},
+
+	folderId: {},
+	
 	mime: {},
 
 	size: {},

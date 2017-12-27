@@ -8,7 +8,7 @@ export function Worker(entities, model) {
 		return (model.hydrateEntity(datas, model.getDefaultValues()));
 	};
 
-	this.findAll = query => {
+	this.findAll = (query = {}) => {
 		const attrs = Object.keys(query);
 		return entities.filter(cur => {
 			return attrs.every(attr => typeof cur[attr] != 'undefined' && cur[attr] == query[attr])

@@ -1,5 +1,14 @@
+<div ng-controller="FilesCtrl">
+
+<li class="nav-item">
+	<input type="file" ngf-select="uploadFile($file)" style="visibility: hidden; height: 0px;" id="uploadFileForm" />
+    <a class="nav-link" ng-click="openUploadWindow()" style="cursor: pointer;">
+    	<i class="fa fa-upload"></i> Téléverser un fichier
+    </a>
+</li>
+
 <li class="nav-item nav-dropdown" ng-class="{'open': open}" style="cursor: pointer;"
-	ng-init="open = false" ng-click="open = !open" ng-controller="FilesCtrl"
+	ng-init="open = false" ng-click="open = !open" 
 >
 	<a class="nav-link nav-dropdown-toggle"> <i class="glyphicon glyphicon-plus"></i> Nouveau ...</a>
 	<ul class="nav-dropdown-items" ng-click="$event.stopPropagation();">
@@ -18,9 +27,11 @@
 		</li>
 
 		<li class="nav-item">
-			<a class="nav-link">
-				&nbsp;&nbsp;&nbsp;<i class="fa fa-file"></i> Fichier texte
+			<a class="nav-link" ng-click="uploadFile();">
+				&nbsp;&nbsp;&nbsp; <i class="fa fa-file"></i> Fichier texte
 			</a>
 		</li>
 	</ul>
 </li>
+
+</div>
