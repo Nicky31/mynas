@@ -1,16 +1,26 @@
 
 function UserService({Users}) {
 
-	this.findUser = async ({name, email}) => {
+	this.formatMongoQuery = ({name, email, id}) => {
 		if (name)
-			var query = {name}
+			return {name}
 		else if (email)
-			var query = {email}
-		return await Users.find(query).toArray()
+			return {email}
+		else if (id)
+			return {id}
+		return {}		
+	}
+
+	this.findOneUser = async (query) => {
+		return await Users.findOne(this.formatMongoQuery(query))
+	}
+
+	this.findUsers = async (query) => {
+		return await Users.find(this.formatMongoQuery(query)).toArray()
 	}
 
 	this.createUser = async data => {
-		const check = await this.findUser({email: data.credentials.email})
+		const check = await this.findUsers({email: data.credentials.email})
 		if (check.length) {
 			throw 'E-mail already existant'
 		}

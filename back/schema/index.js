@@ -22,6 +22,7 @@ type File {
   folderId: ID
   size: Int!
   updatedAt: String!
+  ownerId: ID!
 }
 
 type User {

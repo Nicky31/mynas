@@ -17,12 +17,8 @@ function FileService({Files}) {
 		return path
 	}
 
-	this.findFiles = async (query) => {
-		return await Files.find(query).toArray()
-	}
-
-	this.getFilesIn = async (folderId) => {
-		var query = folderId ? {folderId} : undefined
+	this.findFiles = async (query, user) => {
+		query.ownerId = user.id || user._id
 		return await Files.find(query).toArray()
 	}
 
@@ -34,6 +30,7 @@ function FileService({Files}) {
 		}
 		data.updatedAt = new Date()
 		data.filepath = data.mime != MIME_DIRECTORY ? this.getNewFilePath(data.filename) : '/'
+		data.ownerId = owner.id || owner._id
 		const response = await Files.insert(data)
 		return Object.assign({id: response.insertedIds[0]}, data)
 	}

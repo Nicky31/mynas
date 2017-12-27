@@ -1,14 +1,14 @@
 var files = []
 module.exports = {
   Query: {
-    allFiles: async (root, data, {services: {FileService}}) => {
-      return FileService.getFilesIn()
+    allFiles: async (root, data, {user, services: {FileService}}) => {
+      return FileService.findFiles({}, user)
     },
   },
 
   Mutation: {
-    createFile: async (root, data, {mongo: {Files}, services: {FileService}}) => {
-      return FileService.createFile(data)
+    createFile: async (root, data, {user, mongo: {Files}, services: {FileService}}) => {
+      return FileService.createFile(data, user)
     },
 
     createUser: async (root, data, {mongo: {Users}, services: {UserService}}) => {
