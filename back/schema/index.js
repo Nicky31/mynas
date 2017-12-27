@@ -4,36 +4,37 @@ const resolvers = require('./resolvers');
 
 // Define your types here.
 const typeDefs = `
-  	type Query {
-  		allFiles: [File!]!
-  	}
 
-	type Mutation {
-		createFile(name: String!, description: String!): File
-		createUser(name: String!, credentials: AuthInputDatas!): User
-	}
+type Query {
+  allFiles: [File!]!
+}
 
-	type File {
-    	id: ID!
-    	name: String!
-    	path: String!
-      mime: String!
-      folderId: ID
-      size: Int!
-      updatedAt: String!
-  	}
+type Mutation {
+  createFile(filename: String!, mime: String!, size: Int!, folderId: ID): File!
+  createUser(name: String!, credentials: AuthInputDatas!): User
+}
 
-  	type User {
-  		id: ID!
-  		name: String!
-  		email: String!
-  		password: String!
-  	}
+type File {
+  id: ID!
+  filename: String!
+  filepath: String!
+  mime: String!
+  folderId: ID
+  size: Int!
+  updatedAt: String!
+}
 
-	input AuthInputDatas {
-		email: String!
-		password: String!
-	}
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  password: String!
+}
+
+input AuthInputDatas {
+  email: String!
+  password: String!
+}
 `;
 
 // Generate the schema object from your types definition.

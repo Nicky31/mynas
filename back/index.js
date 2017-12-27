@@ -5,6 +5,7 @@ const cors = require('cors')
 const cookieParser = require('cookie-parser');
 const express = require('express');
 const bodyParser = require('body-parser');
+const fileUpload = require('express-fileupload');
 const { graphqlExpress, graphiqlExpress } = require('apollo-server-express');
 const schema = require('./schema');
 const Services = require('./services').default
@@ -14,13 +15,14 @@ const connectMongo = require('./mongo-connector');
 	var mongo = await connectMongo()
 	const services = Services(mongo)
 	var app = express();
-	app.use(bodyParser())
-	app.use(cookieParser());
-	app.use(expressJwt({
+	app.use(bodyParser()) // Parse JSON content
+	app.use(cookieParser()); // Parse input cookies to req object (req.cookies)
+	app.use(expressJwt({ // Parse input session token to deserialized user session
 	  	secret: config.auth_secret,
   		credentialsRequired: false,
 		getToken: req => req.cookies.token,
 	}));
+	app.use(fileUpload()) // Parse input file uploads to req object (req.files.[fieldname])
 
 	const corsOptions = {
 		origin: 'http://localhost:2000',
@@ -29,7 +31,7 @@ const connectMongo = require('./mongo-connector');
   		"allowedHeaders": "Content-Type,Accept",
   		"preflightContinue": false,
 	}
-	app.use(cors(corsOptions))
+	app.use(cors(corsOptions)) // Enable CORS
 
 	app.use('/auth', async (req, res) => {
 		if (!req.body || !req.body.email || !req.body.password)
@@ -43,6 +45,27 @@ const connectMongo = require('./mongo-connector');
   		}
   		return res.json({error: 'Bad credentials'})
 	});
+
+	app.use('/upload', async (req, res) => {
+  		if (!req.files)
+	    	return res.status(400).send('No files were uploaded.');
+	    var upload = req.files.file
+	    var fileInfos = {
+	    	folderId: req.body.folderId,
+	    	filename: upload.name,
+	    	mime: upload.mimetype,
+	    	size: upload.data.length
+	    }
+
+	    const uploaded = await services.FileService.createFile(fileInfos, req.user)
+	    return upload.mv(uploaded.filepath)
+	    .then(ret => {
+	    	return res.json({file: uploaded})
+	    })
+	    .catch(error => {
+	    	return res.status(400).json({error: "Error happened during file upload"})
+	    })
+	})
 
   	const buildOptions = async (req, res) => {
     	const user = req.user

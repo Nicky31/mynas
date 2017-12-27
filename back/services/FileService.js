@@ -1,20 +1,45 @@
-import moment from 'moment'
+import fs from 'fs'
+import config from '../config';
+
+export const MIME_DIRECTORY = 'directory'
 
 function FileService({Files}) {
+
+	this.getNewFilePath = (filename) => {
+		const dotIdx = filename.lastIndexOf('.')
+		const ext = (dotIdx != -1 && dotIdx < (filename.length - 1)) ? filename.substring(dotIdx) : ''
+
+		var path = ''
+		do {
+			var random = (Math.random().toString(36) + Math.random().toString(36)).replace('\.', '')
+			path = config.upload_folder + random + ext
+		} while (fs.existsSync(path))
+		return path
+	}
+
+	this.findFiles = async (query) => {
+		return await Files.find(query).toArray()
+	}
 
 	this.getFilesIn = async (folderId) => {
 		var query = folderId ? {folderId} : undefined
 		return await Files.find(query).toArray()
 	}
 
-	this.createFile = async (data) => {
-		data.updatedAt = moment().toISOString()
+	this.createFile = async (data, owner) => {
+		if (data.folderId) {
+			const check = await this.findFiles({id: data.folderId, mime: MIME_DIRECTORY})
+			if (!check.length)
+				throw "Unable to found folderId " + data.folderId + " !"
+		}
+		data.updatedAt = new Date()
+		data.filepath = data.mime != MIME_DIRECTORY ? this.getNewFilePath(data.filename) : '/'
 		const response = await Files.insert(data)
 		return Object.assign({id: response.insertedIds[0]}, data)
 	}
 
-	this.createFolder = async (data) => {
-		data.mime = 'folder'
+	this.createFolder = async (data, owner) => {
+		data.mime = MIME_DIRECTORY
 		return this.createFile(data)
 	}
 }
