@@ -46,6 +46,13 @@ const connectMongo = require('./mongo-connector');
   		return res.json({error: 'Bad credentials'})
 	});
 
+	app.use((req, res, next) => {
+		if (req.user)
+			next();
+		else
+			res.status(401).send('Unauthorized')
+	})
+
 	app.use('/upload', async (req, res) => {
   		if (!req.files)
 	    	return res.status(400).send('No files were uploaded.');
