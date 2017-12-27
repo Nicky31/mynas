@@ -22,7 +22,7 @@ function AppInit($rootScope, utilService, userMgrService, fileMgrService, $async
 
 	$async(async function() {
 		try {
-			var filesReq = await fileMgrService.fetchAll()
+			var filesReq = await fileMgrService.findFiles()
 			$rootScope.allFiles = filesReq.entity
 		} catch (error) {
 			console.log('error on fetch files : ' + JSON.stringify(error))

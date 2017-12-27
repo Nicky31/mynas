@@ -6,7 +6,7 @@ const resolvers = require('./resolvers');
 const typeDefs = `
 
 type Query {
-  allFiles: [File!]!
+  allFiles(folderId: String): [File!]!
 }
 
 type Mutation {

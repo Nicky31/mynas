@@ -143,7 +143,7 @@ function AppInit($rootScope, utilService, userMgrService, fileMgrService, $async
 					case 0:
 						_context.prev = 0;
 						_context.next = 3;
-						return fileMgrService.fetchAll();
+						return fileMgrService.findFiles();
 
 					case 3:
 						filesReq = _context.sent;
@@ -202,31 +202,35 @@ var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
 
-var _stringify = require('babel-runtime/core-js/json/stringify');
-
-var _stringify2 = _interopRequireDefault(_stringify);
-
 var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
+
+var _stringify = require('babel-runtime/core-js/json/stringify');
+
+var _stringify2 = _interopRequireDefault(_stringify);
 
 exports.default = FilesCtrl;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-FilesCtrl.$inject = ['$rootScope', '$scope', 'fileMgrService', '$async'];
+FilesCtrl.$inject = ['$rootScope', '$scope', 'fileMgrService', 'utilService', '$async'];
 var sidebarWidgets = [{ include: './views/files/sidebarWidgets.html' }];
 
-function FilesCtrl($rootScope, $scope, fileMgrService, $async) {
+function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async) {
 	var _this = this;
 
+	$scope.cwd = undefined; // Current working directory
 	$scope.viewMode = 'all';
 	$rootScope.global.sidebar.setLinks([{ iconClassname: 'fa fa-folder', name: 'Tous les fichiers', action: function action() {
 			return $scope.viewMode = 'all';
 		} }]);
 	$rootScope.global.sidebar.setWidgets(sidebarWidgets);
 
-	$scope.selected = [];
+	$scope.selection = {
+		fileIds: [],
+		totalSize: 0
+	};
 	$scope.files = [];
 	$rootScope.$watch('allFiles', function (allFiles) {
 		refreshFiles();
@@ -234,28 +238,50 @@ function FilesCtrl($rootScope, $scope, fileMgrService, $async) {
 
 	$scope.toggleSelect = function (file) {
 		if (file == true) {
-			var checked = $scope.selected.length == 0;
-			$scope.selected = checked ? $scope.files.map(function (cur) {
+			var checked = $scope.selection.fileIds.length == 0;
+			$scope.selection.fileIds = checked ? $scope.files.map(function (cur) {
 				return cur.id;
 			}) : [];
 			document.querySelectorAll('.fileCkb').forEach(function (ckb) {
 				return ckb.checked = checked;
 			});
+			calcSelectedSize();
 			return;
 		}
-		var idx = $scope.selected.findIndex(function (cur) {
+		var idx = $scope.selection.fileIds.findIndex(function (cur) {
 			return cur == file.id;
 		});
 		if (idx == -1) {
-			$scope.selected.push(file.id);
+			$scope.selection.fileIds.push(file.id);
+			calcSelectedSize();
 			return;
 		}
-		$scope.selected.splice(idx, 1);
+		$scope.selection.fileIds.splice(idx, 1);
+		calcSelectedSize();
 	};
 
 	$scope.toggleFavourite = function (file) {
 		file.favourite = !file.favourite;
 	};
+
+	$scope.downloadSelection = function () {
+		console.log('download');
+	};
+
+	$scope.deleteSelection = function () {
+		console.log('delete');
+	};
+
+	function calcSelectedSize() {
+		console.log('selected files :' + (0, _stringify2.default)($scope.files.filter(function (cur) {
+			return $scope.selection.fileIds.includes(cur.id);
+		})));
+		$scope.selection.totalSize = utilService.getHumanSize($scope.files.filter(function (cur) {
+			return $scope.selection.fileIds.includes(cur.id);
+		}).reduce(function (totalSize, curFile) {
+			return totalSize + curFile.size;
+		}, 0));
+	}
 
 	function refreshFiles() {
 		$scope.files = $rootScope.allFiles;
@@ -601,6 +627,10 @@ var _stringify = require('babel-runtime/core-js/json/stringify');
 
 var _stringify2 = _interopRequireDefault(_stringify);
 
+var _typeof2 = require('babel-runtime/helpers/typeof');
+
+var _typeof3 = _interopRequireDefault(_typeof2);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 apiService.$inject = ['$http', 'API_URL', 'Upload'];
@@ -609,7 +639,7 @@ function apiService($http, API_URL, Upload) {
 	var _this = this;
 
 	this.graphql = function (datas) {
-		datas = { query: datas };
+		if ((typeof datas === 'undefined' ? 'undefined' : (0, _typeof3.default)(datas)) != 'object') datas = { query: datas };
 		return $http.post(API_URL + 'graphql', (0, _stringify2.default)(datas), {
 			withCredentials: true,
 			headers: {
@@ -645,7 +675,7 @@ function apiService($http, API_URL, Upload) {
 
 exports.default = apiService;
 
-},{"babel-runtime/core-js/json/stringify":32}],13:[function(require,module,exports){
+},{"babel-runtime/core-js/json/stringify":32,"babel-runtime/helpers/typeof":43}],13:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -665,16 +695,15 @@ function fileApiService(apiService, $http) {
   this.fetchAllFiles = fetchAllFiles;
   this.singleUpload = singleUpload;
 
-  function fetchAllFiles() {
-    // return Promise.resolve({success: true, entity: files})
-    return apiService.graphql('{\n      allFiles {\n        id\n        filename\n        filepath\n        mime\n        folderId\n        size\n        updatedAt\n      }\n    }').then(function (ret) {
+  function fetchAllFiles(folderId) {
+    return apiService.graphql({ query: 'query ($folderId: String){\n      allFiles(folderId: $folderId) {\n        id\n        filename\n        filepath\n        mime\n        folderId\n        size\n        updatedAt\n      }\n    }', variables: { folderId: folderId } }).then(function (ret) {
       if (ret.allFiles) {
         return {
           success: true,
           entity: ret.allFiles
         };
       }
-      return false;
+      return ret;
     });
   }
 
@@ -755,7 +784,7 @@ function fileMgrService(fileApiService) {
 		},
 
 		fetchAll: function fetchAll() {
-			return fileApiService.fetchAllFiles();
+			// return fileApiService.fetchAllFiles()
 		},
 
 		update: function update(entity) {},
@@ -764,14 +793,25 @@ function fileMgrService(fileApiService) {
 
 		delete: function _delete(id) {}
 	}, {
-		upload: function upload(file) {
+		findFiles: function findFiles(folderId) {
 			var _this = this;
+
+			return fileApiService.fetchAllFiles(folderId).then(function (ret) {
+				if (ret && ret.success) {
+					ret.entity = _this.worker.append(ret.entity);
+					return ret;
+				}
+				throw ret;
+			});
+		},
+		upload: function upload(file) {
+			var _this2 = this;
 
 			return fileApiService.singleUpload(file).then(function (ret) {
 				if (ret.success) {
-					ret.entity = _this.worker.append(ret.entity);
+					ret.entity = _this2.worker.append(ret.entity);
 				}
-				return ret;
+				throw ret;
 			});
 		}
 	});
@@ -1187,6 +1227,8 @@ var _EntityModel = require('../lib/EntityModel');
 
 var _EntityModel2 = _interopRequireDefault(_EntityModel);
 
+var _utilService = require('../../utilService');
+
 var _moment = require('moment');
 
 var _moment2 = _interopRequireDefault(_moment);
@@ -1205,18 +1247,6 @@ function getMimeFaClass(mime) {
 	return faClassName('o');
 }
 
-function getHumanSize(bytes) {
-	var units = {
-		'GB': 1000000000,
-		'MB': 1000000,
-		'KB': 1000
-	};
-	for (var cur in units) {
-		if (bytes >= units[cur]) return (bytes / units[cur]).toFixed(2) + ' ' + cur;
-	}
-	return bytes + ' B';
-}
-
 var config = {
 	updateCallbacks: {
 		updatedAt: function updatedAt(_updatedAt) {
@@ -1229,7 +1259,7 @@ var config = {
 		},
 
 		size: function size(_size) {
-			this.humanSize = getHumanSize(_size);
+			this.humanSize = (0, _utilService.getHumanSize)(_size);
 		}
 	},
 
@@ -1266,7 +1296,7 @@ exports.default = new _EntityModel2.default('File', {
 
 }, config);
 
-},{"../lib/EntityModel":18,"moment":142}],20:[function(require,module,exports){
+},{"../../utilService":23,"../lib/EntityModel":18,"moment":142}],20:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1525,6 +1555,7 @@ function utilService($http, $cookies, userMgrService, userApiService) {
 	this.getStoredSession = getStoredSession;
 	this.destroySession = destroySession;
 	this.bindGooglePlaceInput = bindGooglePlaceInput;
+	this.getHumanSize = getHumanSize;
 
 	function getStoredSession() {
 		var user = $cookies.getObject('user');
@@ -1564,7 +1595,20 @@ function utilService($http, $cookies, userMgrService, userApiService) {
 	}
 }
 
+function getHumanSize(bytes) {
+	var units = {
+		'GB': 1000000000,
+		'MB': 1000000,
+		'KB': 1000
+	};
+	for (var cur in units) {
+		if (bytes >= units[cur]) return (bytes / units[cur]).toFixed(2) + ' ' + cur;
+	}
+	return bytes + ' B';
+}
+
 exports.default = utilService;
+exports.getHumanSize = getHumanSize;
 
 },{}],24:[function(require,module,exports){
 (function (global, factory) {

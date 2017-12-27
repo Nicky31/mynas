@@ -13,10 +13,9 @@ function fileApiService(apiService, $http) {
   this.fetchAllFiles      = fetchAllFiles;
   this.singleUpload       = singleUpload;
 
-  function fetchAllFiles() {
-    // return Promise.resolve({success: true, entity: files})
-    return apiService.graphql(`{
-      allFiles {
+  function fetchAllFiles(folderId) {
+    return apiService.graphql({query: `query ($folderId: String){
+      allFiles(folderId: $folderId) {
         id
         filename
         filepath
@@ -25,7 +24,7 @@ function fileApiService(apiService, $http) {
         size
         updatedAt
       }
-    }`)
+    }`, variables: {folderId}})
     .then(ret => {
       if (ret.allFiles) {
         return ({
@@ -33,7 +32,7 @@ function fileApiService(apiService, $http) {
           entity: ret.allFiles
         })
       }
-      return false
+      return ret
     })
   }
 

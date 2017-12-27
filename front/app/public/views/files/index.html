@@ -1,6 +1,6 @@
 <table class="table table-filter">
   <thead>
-    <tr style="color: #A1A1A1;">
+    <tr style="color: #A1A1A1;" ng-if="selection.fileIds.length == 0">
         <td>
           <div class="ckbox">
             <input type="checkbox" class="fileCkb" id="ckbAll" />
@@ -15,9 +15,30 @@
         <td>Taille</td>
         <td>Modifié</td>
     </tr>
+
+    <tr style="color: black; font-weight: 400;" ng-if="selection.fileIds.length > 0">
+        <td>
+          <div class="ckbox">
+            <input type="checkbox" class="fileCkb" id="ckbAll" />
+            <label for="ckbAll" ng-click="toggleSelect(true); $event.preventDefault();"></label>
+          </div>
+        </td>
+        <td></td> <!-- star -->
+        <td width="32px"></td> <!-- icon -->
+        <td width="50%">{{selection.fileIds.length}} fichiers</td>
+        <td style="cursor: pointer;" ng-click="deleteSelection();">
+          <i class="fa fa-trash"></i> Supprimer
+        </td>
+        <td style="cursor: pointer;" ng-click="downloadSelection();">
+          <i class="fa fa-arrow-circle-o-down"></i> Télécharger
+        </td>
+        <td>{{selection.totalSize}}</td>
+        <td></td>
+    </tr>
+
   </thead>
   <tbody>
-    <tr ng-repeat="($idx, file) in files" data-status="pagado" ng-class="{'selected': selected.includes(file.id)}"> 
+    <tr ng-repeat="($idx, file) in files" data-status="pagado" ng-class="{'selected': selection.fileIds.includes(file.id)}"> 
       <td>
         <div class="ckbox">
           <input type="checkbox" class="fileCkb" id="ckb{{$idx}}"/>

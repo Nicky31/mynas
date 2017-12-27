@@ -5,7 +5,8 @@ apiService.$inject = ['$http', 'API_URL', 'Upload'];
 function apiService($http, API_URL, Upload) {
 
 	this.graphql = (datas) => {
-		datas = { query: datas }
+		if (typeof datas != 'object')
+			datas = { query: datas }
 		return $http.post(API_URL + 'graphql', JSON.stringify(datas), {
 			withCredentials: true,
 			headers: {

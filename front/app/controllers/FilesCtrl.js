@@ -1,18 +1,22 @@
 'use strict';
 
-FilesCtrl.$inject = ['$rootScope', '$scope', 'fileMgrService', '$async']
+FilesCtrl.$inject = ['$rootScope', '$scope', 'fileMgrService', 'utilService', '$async']
 const sidebarWidgets = [
 	{include: './views/files/sidebarWidgets.html'}
 ]
 
-export default function FilesCtrl($rootScope, $scope, fileMgrService, $async) {
+export default function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async) {
+	$scope.cwd = undefined // Current working directory
 	$scope.viewMode = 'all'
 	$rootScope.global.sidebar.setLinks([
 		{iconClassname: 'fa fa-folder', name: 'Tous les fichiers', action: () => $scope.viewMode = 'all'},
 	])
 	$rootScope.global.sidebar.setWidgets(sidebarWidgets)
 
-	$scope.selected = []
+	$scope.selection = {
+		fileIds: [],
+		totalSize: 0
+	}
 	$scope.files = []
 	$rootScope.$watch('allFiles', allFiles => {
 		refreshFiles()
@@ -20,21 +24,39 @@ export default function FilesCtrl($rootScope, $scope, fileMgrService, $async) {
 
 	$scope.toggleSelect = file => {
 		if (file == true) {
-			const checked = ($scope.selected.length == 0)
-			$scope.selected = checked ? $scope.files.map(cur => cur.id) : []
+			const checked = ($scope.selection.fileIds.length == 0)
+			$scope.selection.fileIds = checked ? $scope.files.map(cur => cur.id) : []
 			document.querySelectorAll('.fileCkb').forEach(ckb => ckb.checked = checked)
+			calcSelectedSize();
 			return ;
 		}
-		const idx = $scope.selected.findIndex(cur => cur == file.id)
+		const idx = $scope.selection.fileIds.findIndex(cur => cur == file.id)
 		if (idx == -1) {
-			$scope.selected.push(file.id)
+			$scope.selection.fileIds.push(file.id)
+			calcSelectedSize()
 			return ;
 		}
-		$scope.selected.splice(idx, 1)
+		$scope.selection.fileIds.splice(idx, 1)
+		calcSelectedSize();
 	}
 
 	$scope.toggleFavourite = file => {
 		file.favourite = !file.favourite
+	}
+
+	$scope.downloadSelection = () => {
+		console.log('download')
+	}
+
+	$scope.deleteSelection = () => {
+		console.log('delete')
+	}
+
+	function calcSelectedSize() {
+		console.log('selected files :' + JSON.stringify($scope.files.filter(cur => $scope.selection.fileIds.includes(cur.id))))
+		$scope.selection.totalSize = utilService.getHumanSize(
+			$scope.files.filter(cur => $scope.selection.fileIds.includes(cur.id)).reduce((totalSize, curFile) => (totalSize  + curFile.size), 0)
+		)
 	}
 
 	function refreshFiles() {

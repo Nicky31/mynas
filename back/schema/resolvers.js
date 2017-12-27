@@ -2,7 +2,8 @@ var files = []
 module.exports = {
   Query: {
     allFiles: async (root, data, {user, services: {FileService}}) => {
-      return FileService.findFiles({}, user)
+      const query = {folderId: data.folderId}
+      return FileService.findFiles(query, user)
     },
   },
 

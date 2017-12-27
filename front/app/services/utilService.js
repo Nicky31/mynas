@@ -7,6 +7,7 @@ function utilService($http, $cookies, userMgrService, userApiService) {
 	this.getStoredSession		= getStoredSession;
 	this.destroySession			= destroySession;
 	this.bindGooglePlaceInput 	= bindGooglePlaceInput;
+	this.getHumanSize			= getHumanSize
 
 	function getStoredSession()  {
 		var user = $cookies.getObject('user');
@@ -46,6 +47,21 @@ function utilService($http, $cookies, userMgrService, userApiService) {
 		return searchBox
 	}
 
+
+}
+
+function getHumanSize(bytes) {
+	const units = {
+		'GB': 1000000000,
+		'MB': 1000000,
+		'KB': 1000
+	}
+	for (var cur in units) {
+		if (bytes >= units[cur])
+			return ((bytes / units[cur]).toFixed(2)) + ' ' + cur
+	}
+	return bytes + ' B'
 }
 
 export default utilService;
+export { getHumanSize }

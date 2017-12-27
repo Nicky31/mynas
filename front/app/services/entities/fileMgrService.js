@@ -10,7 +10,7 @@ function fileMgrService(fileApiService) {
 		},
 
 		fetchAll: () => {
-			return fileApiService.fetchAllFiles()
+			// return fileApiService.fetchAllFiles()
 		},
 
 		update: entity => {
@@ -26,13 +26,23 @@ function fileMgrService(fileApiService) {
 		}
 	},
 	{
+		findFiles: function(folderId) {
+			return fileApiService.fetchAllFiles(folderId)
+			.then(ret => {
+				if (ret && ret.success) {
+					ret.entity = this.worker.append(ret.entity)
+					return ret
+				}
+				throw ret
+			})
+		},
 		upload: function(file) {
 			return fileApiService.singleUpload(file)
 			.then(ret => {
 				if (ret.success) {
 					ret.entity = this.worker.append(ret.entity)
 				}
-				return ret
+				throw ret
 			})
 		}
 	});
