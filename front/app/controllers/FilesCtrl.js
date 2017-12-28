@@ -61,7 +61,6 @@ export default function FilesCtrl($rootScope, $scope, fileMgrService, utilServic
 	}
 
 	function calcSelectedSize() {
-		console.log('selected files :' + JSON.stringify($scope.files.filter(cur => $scope.selection.fileIds.includes(cur.id))))
 		$scope.selection.totalSize = utilService.getHumanSize(
 			$scope.files.filter(cur => $scope.selection.fileIds.includes(cur.id)).reduce((totalSize, curFile) => (totalSize  + curFile.size), 0)
 		)
@@ -69,6 +68,8 @@ export default function FilesCtrl($rootScope, $scope, fileMgrService, utilServic
 
 	function refreshFiles() {
 		$scope.files = $rootScope.allFiles
+		if ($scope.files)
+			$scope.files.sort((a, b) => a.isDir ? -1 : 1)
 	}
 
 	/*
@@ -80,7 +81,16 @@ export default function FilesCtrl($rootScope, $scope, fileMgrService, utilServic
 
 	$scope.submitNewFolder = () => {
 		console.log('creating folder ' + $scope.newFolder.name)	
-		$scope.newFolder.name = ''
+		$async(async function() {
+			try {
+				const folder = await fileMgrService.createFolder($scope.newFolder.name, $scope.cwd)
+				console.log('created foler ' + JSON.stringify(folder))
+				$rootScope.allFiles = fileMgrService.worker.findAll()
+			} catch (error) {
+				console.log('error on new folder ' + JSON.stringify(error))
+			}
+			$scope.newFolder.name = ''
+		})()
 	}
 
 	$scope.openUploadWindow = () => document.getElementById('uploadFileForm').click()

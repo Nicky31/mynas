@@ -16,7 +16,7 @@ function apiService($http, API_URL, Upload) {
 		.then(ret => {
 			if (ret.status != 200)
 				throw {error: 'Bad status', resp: ret}
-			return ret.data.data
+			return ret.data
 		})
 	}
 

@@ -30,7 +30,7 @@ function FileService({Files}) {
 
 	this.createFile = async (data, owner) => {
 		if (data.folderId) {
-			const check = await this.findFiles({id: data.folderId, mime: MIME_DIRECTORY})
+			const check = await this.findFiles({_id: new ObjectId(data.folderId), mime: MIME_DIRECTORY})
 			if (!check.length)
 				throw "Unable to found folderId " + data.folderId + " !"
 		}
@@ -43,7 +43,8 @@ function FileService({Files}) {
 
 	this.createFolder = async (data, owner) => {
 		data.mime = MIME_DIRECTORY
-		return this.createFile(data)
+		data.size = 0
+		return this.createFile(data, owner)
 	}
 
 	this.deleteFiles = async (fileIds, user) => {
@@ -55,7 +56,8 @@ function FileService({Files}) {
 		return Files.deleteMany(query)
 		.then(ret => {
 			files.forEach(file => {
-				fs.unlinkSync(file.filepath)
+				if (file.mime != MIME_DIRECTORY)
+					fs.unlinkSync(file.filepath)
 			})
 		})
 	}

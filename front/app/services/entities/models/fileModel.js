@@ -27,6 +27,7 @@ const config = {
 
 		mime: function(mime) {
 			this.mimeFaClassName = getMimeFaClass(mime)
+			this.isDir = (mime == 'directory')
 		},
 
 		size: function(size) {
@@ -65,6 +66,10 @@ export default new EntityModel('File', {
 
 	humanSize: {
 		default: ''
+	},
+
+	isDir: {
+		default: false
 	}
 
 }, config);

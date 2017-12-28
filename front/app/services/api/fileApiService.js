@@ -12,7 +12,8 @@ var files = [
 function fileApiService(apiService, $http) {
   this.fetchAllFiles      = fetchAllFiles;
   this.singleUpload       = singleUpload;
-  this.deleteFiles         = deleteFiles;
+  this.deleteFiles        = deleteFiles;
+  this.createFolder       = createFolder;
 
   function fetchAllFiles(folderId) {
     return apiService.graphql({query: `query ($folderId: String){
@@ -27,13 +28,13 @@ function fileApiService(apiService, $http) {
       }
     }`, variables: {folderId}})
     .then(ret => {
-      if (ret.allFiles) {
+      if (ret.data && ret.data.allFiles) {
         return ({
           success: true,
-          entity: ret.allFiles
+          entity: ret.data.allFiles
         })
       }
-      return ret
+      throw ret
     })
   }
 
@@ -43,14 +44,39 @@ function fileApiService(apiService, $http) {
       file
     })
     .then(ret => {
-      if (ret.data) {        
+      if (ret.data && ret.data.file) {        
         return {
           success: true,
           entity: ret.data.file
         }
       }
-      console.log('error : ' + JSON.stringify(ret))
-      return {error: ret}
+      throw ret
+    })
+  }
+
+  function createFolder(name, parentId) {
+    return apiService.graphql({query: `
+      mutation createFolder($name: String!, $parentId: ID) {
+        createFolder(name: $name, parentId: $parentId) {
+          id
+          filename
+          filepath
+          mime
+          folderId
+          size
+          updatedAt
+        }
+      }`,
+      variables: {name, parentId}
+    })
+    .then(ret => {
+      if (ret.data) {
+        return {
+          success: true,
+          entity: ret.data.createFolder
+        }
+      }
+      throw ret
     })
   }
 

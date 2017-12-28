@@ -47,6 +47,17 @@ function fileMgrService(fileApiService) {
 				throw ret
 			})
 		},
+
+		createFolder: function(name, parentId) {
+			return fileApiService.createFolder(name, parentId)
+			.then(ret => {
+				if (ret.success) {
+					ret.entity = this.worker.append(ret.entity)
+					return ret
+				}
+				throw ret
+			})
+		}
 	});
 }
 

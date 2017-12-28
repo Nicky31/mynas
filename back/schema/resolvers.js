@@ -12,6 +12,13 @@ module.exports = {
       return FileService.createFile(data, user)
     },
 
+    createFolder: async (root, data, {user, services: {FileService}}) => {
+      return FileService.createFolder({
+        filename: data.name,
+        folderId: data.folderId
+      }, user)
+    },
+
     deleteFiles: async (root, data, {user, services: {FileService}}) => {
       return FileService.deleteFiles(data.fileIds, user)
     },

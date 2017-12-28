@@ -11,6 +11,7 @@ type Query {
 
 type Mutation {
   createFile(filename: String!, mime: String!, size: Int!, folderId: ID): File!
+  createFolder(name: String!, parentId: ID): File!
   deleteFiles(fileIds: [ID!]!): Boolean
   createUser(name: String!, credentials: AuthInputDatas!): User
 }

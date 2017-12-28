@@ -269,7 +269,6 @@ function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async) {
 	};
 
 	$scope.deleteSelection = function () {
-		console.log('delete');
 		$async((0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee() {
 			var ret;
 			return _regenerator2.default.wrap(function _callee$(_context) {
@@ -304,9 +303,6 @@ function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async) {
 	};
 
 	function calcSelectedSize() {
-		console.log('selected files :' + (0, _stringify2.default)($scope.files.filter(function (cur) {
-			return $scope.selection.fileIds.includes(cur.id);
-		})));
 		$scope.selection.totalSize = utilService.getHumanSize($scope.files.filter(function (cur) {
 			return $scope.selection.fileIds.includes(cur.id);
 		}).reduce(function (totalSize, curFile) {
@@ -316,6 +312,9 @@ function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async) {
 
 	function refreshFiles() {
 		$scope.files = $rootScope.allFiles;
+		if ($scope.files) $scope.files.sort(function (a, b) {
+			return a.isDir ? -1 : 1;
+		});
 	}
 
 	/*
@@ -327,7 +326,40 @@ function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async) {
 
 	$scope.submitNewFolder = function () {
 		console.log('creating folder ' + $scope.newFolder.name);
-		$scope.newFolder.name = '';
+		$async((0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2() {
+			var folder;
+			return _regenerator2.default.wrap(function _callee2$(_context2) {
+				while (1) {
+					switch (_context2.prev = _context2.next) {
+						case 0:
+							_context2.prev = 0;
+							_context2.next = 3;
+							return fileMgrService.createFolder($scope.newFolder.name, $scope.cwd);
+
+						case 3:
+							folder = _context2.sent;
+
+							console.log('created foler ' + (0, _stringify2.default)(folder));
+							$rootScope.allFiles = fileMgrService.worker.findAll();
+							_context2.next = 11;
+							break;
+
+						case 8:
+							_context2.prev = 8;
+							_context2.t0 = _context2['catch'](0);
+
+							console.log('error on new folder ' + (0, _stringify2.default)(_context2.t0));
+
+						case 11:
+							$scope.newFolder.name = '';
+
+						case 12:
+						case 'end':
+							return _context2.stop();
+					}
+				}
+			}, _callee2, this, [[0, 8]]);
+		})))();
 	};
 
 	$scope.openUploadWindow = function () {
@@ -335,54 +367,54 @@ function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async) {
 	};
 
 	$scope.uploadFile = function () {
-		var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(file, errFiles) {
-			return _regenerator2.default.wrap(function _callee3$(_context3) {
+		var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4(file, errFiles) {
+			return _regenerator2.default.wrap(function _callee4$(_context4) {
 				while (1) {
-					switch (_context3.prev = _context3.next) {
+					switch (_context4.prev = _context4.next) {
 						case 0:
 							if (file && (!errFiles || !errFiles.length)) {
-								$async((0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2() {
+								$async((0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3() {
 									var upload;
-									return _regenerator2.default.wrap(function _callee2$(_context2) {
+									return _regenerator2.default.wrap(function _callee3$(_context3) {
 										while (1) {
-											switch (_context2.prev = _context2.next) {
+											switch (_context3.prev = _context3.next) {
 												case 0:
-													_context2.prev = 0;
-													_context2.next = 3;
+													_context3.prev = 0;
+													_context3.next = 3;
 													return fileMgrService.upload(file);
 
 												case 3:
-													upload = _context2.sent;
+													upload = _context3.sent;
 
 													$rootScope.allFiles = fileMgrService.worker.findAll();
-													_context2.next = 10;
+													_context3.next = 10;
 													break;
 
 												case 7:
-													_context2.prev = 7;
-													_context2.t0 = _context2['catch'](0);
+													_context3.prev = 7;
+													_context3.t0 = _context3['catch'](0);
 
-													console.log('got error :' + (0, _stringify2.default)(_context2.t0));
+													console.log('got error :' + (0, _stringify2.default)(_context3.t0));
 
 												case 10:
 												case 'end':
-													return _context2.stop();
+													return _context3.stop();
 											}
 										}
-									}, _callee2, this, [[0, 7]]);
+									}, _callee3, this, [[0, 7]]);
 								})))();
 							}
 
 						case 1:
 						case 'end':
-							return _context3.stop();
+							return _context4.stop();
 					}
 				}
-			}, _callee3, _this);
+			}, _callee4, _this);
 		}));
 
 		return function (_x, _x2) {
-			return _ref2.apply(this, arguments);
+			return _ref3.apply(this, arguments);
 		};
 	}();
 }
@@ -678,7 +710,7 @@ function apiService($http, API_URL, Upload) {
 			}
 		}).then(function (ret) {
 			if (ret.status != 200) throw { error: 'Bad status', resp: ret };
-			return ret.data.data;
+			return ret.data;
 		});
 	};
 
@@ -712,13 +744,6 @@ exports.default = apiService;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _stringify = require('babel-runtime/core-js/json/stringify');
-
-var _stringify2 = _interopRequireDefault(_stringify);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 fileApiService.$inject = ['apiService', '$http'];
 var files = [{ id: '0', favourite: false, name: 'monimage.jpeg', mime: 'mime', size: "500B", updatedAt: "2017-12-06T16:58:16.863Z" }, { id: '1', favourite: false, name: 'onchconh.jpeg', mime: 'mime', size: "854", updatedAt: "2017-12-02T16:58:16.863Z" }, { id: '2', favourite: false, name: 'deuxieme.jpeg', mime: 'mime', size: "123B", updatedAt: "2017-12-04T12:30:16.863Z" }, { id: '3', favourite: false, name: 'quooii.jpeg', mime: 'mime', size: "3K", updatedAt: "2017-12-06T16:01:16.863Z" }];
 
@@ -726,16 +751,17 @@ function fileApiService(apiService, $http) {
   this.fetchAllFiles = fetchAllFiles;
   this.singleUpload = singleUpload;
   this.deleteFiles = deleteFiles;
+  this.createFolder = createFolder;
 
   function fetchAllFiles(folderId) {
     return apiService.graphql({ query: 'query ($folderId: String){\n      allFiles(folderId: $folderId) {\n        id\n        filename\n        filepath\n        mime\n        folderId\n        size\n        updatedAt\n      }\n    }', variables: { folderId: folderId } }).then(function (ret) {
-      if (ret.allFiles) {
+      if (ret.data && ret.data.allFiles) {
         return {
           success: true,
-          entity: ret.allFiles
+          entity: ret.data.allFiles
         };
       }
-      return ret;
+      throw ret;
     });
   }
 
@@ -744,14 +770,27 @@ function fileApiService(apiService, $http) {
       folderId: folderId,
       file: file
     }).then(function (ret) {
-      if (ret.data) {
+      if (ret.data && ret.data.file) {
         return {
           success: true,
           entity: ret.data.file
         };
       }
-      console.log('error : ' + (0, _stringify2.default)(ret));
-      return { error: ret };
+      throw ret;
+    });
+  }
+
+  function createFolder(name, parentId) {
+    return apiService.graphql({ query: '\n      mutation createFolder($name: String!, $parentId: ID) {\n        createFolder(name: $name, parentId: $parentId) {\n          id\n          filename\n          filepath\n          mime\n          folderId\n          size\n          updatedAt\n        }\n      }',
+      variables: { name: name, parentId: parentId }
+    }).then(function (ret) {
+      if (ret.data) {
+        return {
+          success: true,
+          entity: ret.data.createFolder
+        };
+      }
+      throw ret;
     });
   }
 
@@ -764,7 +803,7 @@ function fileApiService(apiService, $http) {
 
 exports.default = fileApiService;
 
-},{"babel-runtime/core-js/json/stringify":32}],14:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -857,6 +896,18 @@ function fileMgrService(fileApiService) {
 			return fileApiService.singleUpload(file).then(function (ret) {
 				if (ret.success) {
 					ret.entity = _this2.worker.append(ret.entity);
+					return ret;
+				}
+				throw ret;
+			});
+		},
+
+		createFolder: function createFolder(name, parentId) {
+			var _this3 = this;
+
+			return fileApiService.createFolder(name, parentId).then(function (ret) {
+				if (ret.success) {
+					ret.entity = _this3.worker.append(ret.entity);
 					return ret;
 				}
 				throw ret;
@@ -1307,6 +1358,7 @@ var config = {
 
 		mime: function mime(_mime) {
 			this.mimeFaClassName = getMimeFaClass(_mime);
+			this.isDir = _mime == 'directory';
 		},
 
 		size: function size(_size) {
@@ -1343,6 +1395,10 @@ exports.default = new _EntityModel2.default('File', {
 
 	humanSize: {
 		default: ''
+	},
+
+	isDir: {
+		default: false
 	}
 
 }, config);
