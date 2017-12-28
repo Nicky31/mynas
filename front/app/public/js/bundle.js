@@ -119,6 +119,7 @@ AppInit.$inject = ['$rootScope', 'utilService', 'userMgrService', 'fileMgrServic
 function AppInit($rootScope, utilService, userMgrService, fileMgrService, $async) {
 	$rootScope.global = {
 		title: 'DataHome',
+		breadcrumb: [{ txt: "OwnSpace" }],
 		user: false
 	};
 
@@ -185,11 +186,13 @@ exports.default = function (module) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+	value: true
 });
 exports.default = NotesCtrl;
 NotesCtrl.$inject = ['$rootScope', '$scope'];
-function NotesCtrl($rootScope, $scope) {}
+function NotesCtrl($rootScope, $scope) {
+	$rootScope.global.breadcrumb = [{ txt: 'Agenda' }];
+}
 
 },{}],5:[function(require,module,exports){
 'use strict';
@@ -220,7 +223,8 @@ var sidebarWidgets = [{ include: './views/files/sidebarWidgets.html' }];
 function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async) {
 	var _this = this;
 
-	$scope.cwd = undefined; // Current working directory
+	$scope.cwd = []; // Current working directory path
+	$rootScope.global.breadcrumb = [{ iconClassname: 'fa fa-home' }];
 	$scope.viewMode = 'all';
 	$rootScope.global.sidebar.setLinks([{ iconClassname: 'fa fa-folder', name: 'Tous les fichiers', action: function action() {
 			return $scope.viewMode = 'all';
@@ -309,11 +313,13 @@ function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async) {
 			return totalSize + curFile.size;
 		}, 0));
 	}
-
 	function refreshFiles() {
-		$scope.files = $rootScope.allFiles;
+		var cwd = $scope.cwd.last();
+		$scope.files = cwd ? $rootScope.allFiles.filter(function (cur) {
+			return cur.folderId == cwd;
+		}) : $rootScope.allFiles;
 		if ($scope.files) $scope.files.sort(function (a, b) {
-			return a.isDir ? -1 : 1;
+			return a.directory ? -1 : 1;
 		});
 	}
 
@@ -327,38 +333,39 @@ function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async) {
 	$scope.submitNewFolder = function () {
 		console.log('creating folder ' + $scope.newFolder.name);
 		$async((0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2() {
-			var folder;
+			var cwd, folder;
 			return _regenerator2.default.wrap(function _callee2$(_context2) {
 				while (1) {
 					switch (_context2.prev = _context2.next) {
 						case 0:
 							_context2.prev = 0;
-							_context2.next = 3;
-							return fileMgrService.createFolder($scope.newFolder.name, $scope.cwd);
+							cwd = $scope.cwd.last();
+							_context2.next = 4;
+							return fileMgrService.createFolder($scope.newFolder.name, cwd);
 
-						case 3:
+						case 4:
 							folder = _context2.sent;
 
 							console.log('created foler ' + (0, _stringify2.default)(folder));
 							$rootScope.allFiles = fileMgrService.worker.findAll();
-							_context2.next = 11;
+							_context2.next = 12;
 							break;
 
-						case 8:
-							_context2.prev = 8;
+						case 9:
+							_context2.prev = 9;
 							_context2.t0 = _context2['catch'](0);
 
 							console.log('error on new folder ' + (0, _stringify2.default)(_context2.t0));
 
-						case 11:
+						case 12:
 							$scope.newFolder.name = '';
 
-						case 12:
+						case 13:
 						case 'end':
 							return _context2.stop();
 					}
 				}
-			}, _callee2, this, [[0, 8]]);
+			}, _callee2, this, [[0, 9]]);
 		})))();
 	};
 
@@ -423,11 +430,13 @@ function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+	value: true
 });
 exports.default = HomeCtrl;
 HomeCtrl.$inject = ['$rootScope', '$scope'];
-function HomeCtrl($rootScope, $scope) {}
+function HomeCtrl($rootScope, $scope) {
+	$rootScope.global.breadcrumb = [{ txt: 'Dashboard' }];
+}
 
 },{}],7:[function(require,module,exports){
 'use strict';
@@ -508,11 +517,13 @@ function LoginCtrl($rootScope, $scope, $async, userMgrService, utilService) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+	value: true
 });
 exports.default = NotesCtrl;
 NotesCtrl.$inject = ['$rootScope', '$scope'];
-function NotesCtrl($rootScope, $scope) {}
+function NotesCtrl($rootScope, $scope) {
+	$rootScope.global.breadcrumb = [{ txt: 'Notes' }];
+}
 
 },{}],9:[function(require,module,exports){
 'use strict';
@@ -754,7 +765,7 @@ function fileApiService(apiService, $http) {
   this.createFolder = createFolder;
 
   function fetchAllFiles(folderId) {
-    return apiService.graphql({ query: 'query ($folderId: String){\n      allFiles(folderId: $folderId) {\n        id\n        filename\n        filepath\n        mime\n        folderId\n        size\n        updatedAt\n      }\n    }', variables: { folderId: folderId } }).then(function (ret) {
+    return apiService.graphql({ query: 'query ($folderId: String){\n      allFiles(folderId: $folderId) {\n        id\n        filename\n        filepath\n        mime\n        folderId\n        size\n        updatedAt\n        directory\n      }\n    }', variables: { folderId: folderId } }).then(function (ret) {
       if (ret.data && ret.data.allFiles) {
         return {
           success: true,
@@ -781,7 +792,7 @@ function fileApiService(apiService, $http) {
   }
 
   function createFolder(name, parentId) {
-    return apiService.graphql({ query: '\n      mutation createFolder($name: String!, $parentId: ID) {\n        createFolder(name: $name, parentId: $parentId) {\n          id\n          filename\n          filepath\n          mime\n          folderId\n          size\n          updatedAt\n        }\n      }',
+    return apiService.graphql({ query: '\n      mutation createFolder($name: String!, $parentId: ID) {\n        createFolder(name: $name, parentId: $parentId) {\n          id\n          filename\n          filepath\n          mime\n          folderId\n          size\n          updatedAt\n          directory\n        }\n      }',
       variables: { name: name, parentId: parentId }
     }).then(function (ret) {
       if (ret.data) {
@@ -1358,7 +1369,6 @@ var config = {
 
 		mime: function mime(_mime) {
 			this.mimeFaClassName = getMimeFaClass(_mime);
-			this.isDir = _mime == 'directory';
 		},
 
 		size: function size(_size) {
@@ -1384,6 +1394,10 @@ exports.default = new _EntityModel2.default('File', {
 
 	updatedAt: {},
 
+	directory: {
+		default: false
+	},
+
 	// Display utils
 	humanUpdatedAt: {
 		default: ''
@@ -1395,10 +1409,6 @@ exports.default = new _EntityModel2.default('File', {
 
 	humanSize: {
 		default: ''
-	},
-
-	isDir: {
-		default: false
 	}
 
 }, config);
@@ -1713,6 +1723,10 @@ function getHumanSize(bytes) {
 	}
 	return bytes + ' B';
 }
+
+Array.prototype.last = function () {
+	return this.length > 0 ? this[this.length - 1] : null;
+};
 
 exports.default = utilService;
 exports.getHumanSize = getHumanSize;

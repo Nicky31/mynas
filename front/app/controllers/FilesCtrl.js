@@ -6,7 +6,8 @@ const sidebarWidgets = [
 ]
 
 export default function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async) {
-	$scope.cwd = undefined // Current working directory
+	$scope.cwd = [] // Current working directory path
+	$rootScope.global.breadcrumb = [{iconClassname: 'fa fa-home'}]
 	$scope.viewMode = 'all'
 	$rootScope.global.sidebar.setLinks([
 		{iconClassname: 'fa fa-folder', name: 'Tous les fichiers', action: () => $scope.viewMode = 'all'},
@@ -65,11 +66,12 @@ export default function FilesCtrl($rootScope, $scope, fileMgrService, utilServic
 			$scope.files.filter(cur => $scope.selection.fileIds.includes(cur.id)).reduce((totalSize, curFile) => (totalSize  + curFile.size), 0)
 		)
 	}
-
 	function refreshFiles() {
-		$scope.files = $rootScope.allFiles
+		const cwd = $scope.cwd.last()
+		$scope.files = cwd	? $rootScope.allFiles.filter(cur => cur.folderId == cwd)
+							: $rootScope.allFiles
 		if ($scope.files)
-			$scope.files.sort((a, b) => a.isDir ? -1 : 1)
+			$scope.files.sort((a, b) => a.directory ? -1 : 1)
 	}
 
 	/*
@@ -83,7 +85,8 @@ export default function FilesCtrl($rootScope, $scope, fileMgrService, utilServic
 		console.log('creating folder ' + $scope.newFolder.name)	
 		$async(async function() {
 			try {
-				const folder = await fileMgrService.createFolder($scope.newFolder.name, $scope.cwd)
+				const cwd = $scope.cwd.last()
+				const folder = await fileMgrService.createFolder($scope.newFolder.name, cwd)
 				console.log('created foler ' + JSON.stringify(folder))
 				$rootScope.allFiles = fileMgrService.worker.findAll()
 			} catch (error) {

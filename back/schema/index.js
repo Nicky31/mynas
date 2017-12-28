@@ -25,6 +25,7 @@ type File {
   size: Int!
   updatedAt: String!
   ownerId: ID!
+  directory: Boolean
 }
 
 type User {

@@ -37,6 +37,8 @@ function FileService({Files}) {
 		data.updatedAt = new Date()
 		data.filepath = data.mime != MIME_DIRECTORY ? this.getNewFilePath(data.filename) : '/'
 		data.ownerId = owner.id || owner._id
+		if (!data.directory)
+			data.directory = false
 		const response = await Files.insert(data)
 		return Object.assign({id: response.insertedIds[0]}, data)
 	}
@@ -44,6 +46,7 @@ function FileService({Files}) {
 	this.createFolder = async (data, owner) => {
 		data.mime = MIME_DIRECTORY
 		data.size = 0
+		data.directory = true
 		return this.createFile(data, owner)
 	}
 
@@ -56,7 +59,7 @@ function FileService({Files}) {
 		return Files.deleteMany(query)
 		.then(ret => {
 			files.forEach(file => {
-				if (file.mime != MIME_DIRECTORY)
+				if (!file.directory)
 					fs.unlinkSync(file.filepath)
 			})
 		})

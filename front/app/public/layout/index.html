@@ -63,7 +63,10 @@
             <!-- Breadcrumb -->
             <ol class="breadcrumb" breadcrumb>
                 <ncy-breadcrumb></ncy-breadcrumb>
-                {{global.title}}
+                <li class="breadcrumb-item" ng-repeat="bc in global.breadcrumb">
+                    <span ng-if="bc.txt">{{bc.txt}}</span>
+                    <i style="font-size: 20px;" ng-if="bc.iconClassname" ng-class="bc.iconClassname"></i>
+                </li>
                 <!-- Breadcrumb Menu-->
                 <li class="breadcrumb-menu">
 <!--                     <div class="btn-group" role="group" aria-label="Button group with nested dropdown">

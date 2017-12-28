@@ -25,6 +25,7 @@ function fileApiService(apiService, $http) {
         folderId
         size
         updatedAt
+        directory
       }
     }`, variables: {folderId}})
     .then(ret => {
@@ -65,6 +66,7 @@ function fileApiService(apiService, $http) {
           folderId
           size
           updatedAt
+          directory
         }
       }`,
       variables: {name, parentId}

@@ -4,6 +4,7 @@ AppInit.$inject = ['$rootScope', 'utilService', 'userMgrService', 'fileMgrServic
 function AppInit($rootScope, utilService, userMgrService, fileMgrService, $async) {
 	$rootScope.global = {
 		title: 'DataHome',
+		breadcrumb: [{txt: "OwnSpace"}],
 		user: false,
 	};
 
