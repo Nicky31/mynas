@@ -12,6 +12,7 @@ var files = [
 function fileApiService(apiService, $http) {
   this.fetchAllFiles      = fetchAllFiles;
   this.singleUpload       = singleUpload;
+  this.deleteFiles         = deleteFiles;
 
   function fetchAllFiles(folderId) {
     return apiService.graphql({query: `query ($folderId: String){
@@ -50,6 +51,15 @@ function fileApiService(apiService, $http) {
       }
       console.log('error : ' + JSON.stringify(ret))
       return {error: ret}
+    })
+  }
+
+  function deleteFiles(fileIds) {
+    return apiService.graphql({query: `
+      mutation deleteFiles($fileIds: [ID!]!) {
+        deleteFiles(fileIds: $fileIds)
+      }`,
+      variables: {fileIds}
     })
   }
 }

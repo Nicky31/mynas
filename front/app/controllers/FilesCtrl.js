@@ -49,7 +49,15 @@ export default function FilesCtrl($rootScope, $scope, fileMgrService, utilServic
 	}
 
 	$scope.deleteSelection = () => {
-		console.log('delete')
+		$async(async function() {
+			try {
+				const ret = await fileMgrService.delete($scope.selection.fileIds)
+				$scope.selection.fileIds = []
+				$rootScope.allFiles = fileMgrService.worker.findAll()
+			} catch (error) {
+				console.log('error on delete')
+			}
+		})();
 	}
 
 	function calcSelectedSize() {

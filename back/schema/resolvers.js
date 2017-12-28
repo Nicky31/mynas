@@ -12,6 +12,10 @@ module.exports = {
       return FileService.createFile(data, user)
     },
 
+    deleteFiles: async (root, data, {user, services: {FileService}}) => {
+      return FileService.deleteFiles(data.fileIds, user)
+    },
+
     createUser: async (root, data, {mongo: {Users}, services: {UserService}}) => {
       return UserService.createUser(data)
     }

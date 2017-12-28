@@ -1,5 +1,6 @@
 import fs from 'fs'
 import config from '../config';
+import { ObjectId } from 'mongodb'
 
 export const MIME_DIRECTORY = 'directory'
 
@@ -22,6 +23,11 @@ function FileService({Files}) {
 		return await Files.find(query).toArray()
 	}
 
+	this.findOneFile = async (query, user) => {
+		query.ownerId = user.id || user._id
+		return await Files.findOne(query)
+	}
+
 	this.createFile = async (data, owner) => {
 		if (data.folderId) {
 			const check = await this.findFiles({id: data.folderId, mime: MIME_DIRECTORY})
@@ -38,6 +44,20 @@ function FileService({Files}) {
 	this.createFolder = async (data, owner) => {
 		data.mime = MIME_DIRECTORY
 		return this.createFile(data)
+	}
+
+	this.deleteFiles = async (fileIds, user) => {
+		const query = {_id: {"$in": fileIds.map(id => new ObjectId(id))}}
+		const files = await this.findFiles(query, user)
+		if (!files || !files.length) {
+			throw "Unable to delete files " + fileIds + " !"
+		}
+		return Files.deleteMany(query)
+		.then(ret => {
+			files.forEach(file => {
+				fs.unlinkSync(file.filepath)
+			})
+		})
 	}
 }
 

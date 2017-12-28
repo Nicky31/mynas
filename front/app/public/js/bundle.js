@@ -198,6 +198,10 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
+var _stringify = require('babel-runtime/core-js/json/stringify');
+
+var _stringify2 = _interopRequireDefault(_stringify);
+
 var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
@@ -205,10 +209,6 @@ var _regenerator2 = _interopRequireDefault(_regenerator);
 var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
-
-var _stringify = require('babel-runtime/core-js/json/stringify');
-
-var _stringify2 = _interopRequireDefault(_stringify);
 
 exports.default = FilesCtrl;
 
@@ -270,6 +270,37 @@ function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async) {
 
 	$scope.deleteSelection = function () {
 		console.log('delete');
+		$async((0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee() {
+			var ret;
+			return _regenerator2.default.wrap(function _callee$(_context) {
+				while (1) {
+					switch (_context.prev = _context.next) {
+						case 0:
+							_context.prev = 0;
+							_context.next = 3;
+							return fileMgrService.delete($scope.selection.fileIds);
+
+						case 3:
+							ret = _context.sent;
+
+							$scope.selection.fileIds = [];
+							$rootScope.allFiles = fileMgrService.worker.findAll();
+							_context.next = 11;
+							break;
+
+						case 8:
+							_context.prev = 8;
+							_context.t0 = _context['catch'](0);
+
+							console.log('error on delete');
+
+						case 11:
+						case 'end':
+							return _context.stop();
+					}
+				}
+			}, _callee, this, [[0, 8]]);
+		})))();
 	};
 
 	function calcSelectedSize() {
@@ -304,54 +335,54 @@ function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async) {
 	};
 
 	$scope.uploadFile = function () {
-		var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(file, errFiles) {
-			return _regenerator2.default.wrap(function _callee2$(_context2) {
+		var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(file, errFiles) {
+			return _regenerator2.default.wrap(function _callee3$(_context3) {
 				while (1) {
-					switch (_context2.prev = _context2.next) {
+					switch (_context3.prev = _context3.next) {
 						case 0:
 							if (file && (!errFiles || !errFiles.length)) {
-								$async((0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee() {
+								$async((0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2() {
 									var upload;
-									return _regenerator2.default.wrap(function _callee$(_context) {
+									return _regenerator2.default.wrap(function _callee2$(_context2) {
 										while (1) {
-											switch (_context.prev = _context.next) {
+											switch (_context2.prev = _context2.next) {
 												case 0:
-													_context.prev = 0;
-													_context.next = 3;
+													_context2.prev = 0;
+													_context2.next = 3;
 													return fileMgrService.upload(file);
 
 												case 3:
-													upload = _context.sent;
+													upload = _context2.sent;
 
 													$rootScope.allFiles = fileMgrService.worker.findAll();
-													_context.next = 10;
+													_context2.next = 10;
 													break;
 
 												case 7:
-													_context.prev = 7;
-													_context.t0 = _context['catch'](0);
+													_context2.prev = 7;
+													_context2.t0 = _context2['catch'](0);
 
-													console.log('got error :' + (0, _stringify2.default)(_context.t0));
+													console.log('got error :' + (0, _stringify2.default)(_context2.t0));
 
 												case 10:
 												case 'end':
-													return _context.stop();
+													return _context2.stop();
 											}
 										}
-									}, _callee, this, [[0, 7]]);
+									}, _callee2, this, [[0, 7]]);
 								})))();
 							}
 
 						case 1:
 						case 'end':
-							return _context2.stop();
+							return _context3.stop();
 					}
 				}
-			}, _callee2, _this);
+			}, _callee3, _this);
 		}));
 
 		return function (_x, _x2) {
-			return _ref.apply(this, arguments);
+			return _ref2.apply(this, arguments);
 		};
 	}();
 }
@@ -694,6 +725,7 @@ var files = [{ id: '0', favourite: false, name: 'monimage.jpeg', mime: 'mime', s
 function fileApiService(apiService, $http) {
   this.fetchAllFiles = fetchAllFiles;
   this.singleUpload = singleUpload;
+  this.deleteFiles = deleteFiles;
 
   function fetchAllFiles(folderId) {
     return apiService.graphql({ query: 'query ($folderId: String){\n      allFiles(folderId: $folderId) {\n        id\n        filename\n        filepath\n        mime\n        folderId\n        size\n        updatedAt\n      }\n    }', variables: { folderId: folderId } }).then(function (ret) {
@@ -720,6 +752,12 @@ function fileApiService(apiService, $http) {
       }
       console.log('error : ' + (0, _stringify2.default)(ret));
       return { error: ret };
+    });
+  }
+
+  function deleteFiles(fileIds) {
+    return apiService.graphql({ query: '\n      mutation deleteFiles($fileIds: [ID!]!) {\n        deleteFiles(fileIds: $fileIds)\n      }',
+      variables: { fileIds: fileIds }
     });
   }
 }
@@ -764,6 +802,10 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
+var _extends2 = require('babel-runtime/helpers/extends');
+
+var _extends3 = _interopRequireDefault(_extends2);
+
 var _EntityManager = require('./lib/EntityManager');
 
 var _EntityManager2 = _interopRequireDefault(_EntityManager);
@@ -791,7 +833,11 @@ function fileMgrService(fileApiService) {
 
 		insert: function insert(entity) {},
 
-		delete: function _delete(id) {}
+		delete: function _delete(id) {
+			return fileApiService.deleteFiles(id).then(function (ret) {
+				return (0, _extends3.default)({ success: true }, ret);
+			});
+		}
 	}, {
 		findFiles: function findFiles(folderId) {
 			var _this = this;
@@ -804,12 +850,14 @@ function fileMgrService(fileApiService) {
 				throw ret;
 			});
 		},
+
 		upload: function upload(file) {
 			var _this2 = this;
 
 			return fileApiService.singleUpload(file).then(function (ret) {
 				if (ret.success) {
 					ret.entity = _this2.worker.append(ret.entity);
+					return ret;
 				}
 				throw ret;
 			});
@@ -819,7 +867,7 @@ function fileMgrService(fileApiService) {
 
 exports.default = fileMgrService;
 
-},{"./lib/EntityManager":16,"./models/fileModel":19}],16:[function(require,module,exports){
+},{"./lib/EntityManager":16,"./models/fileModel":19,"babel-runtime/helpers/extends":40}],16:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -889,6 +937,9 @@ function Worker(entities, model) {
 	};
 
 	this.delete = function (id) {
+		if (Array.isArray(id)) {
+			return id.map(_this.delete.bind(_this));
+		}
 		var index = entities.findIndex(function (cur) {
 			return cur.id == id;
 		});

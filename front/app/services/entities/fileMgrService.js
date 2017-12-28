@@ -22,7 +22,7 @@ function fileMgrService(fileApiService) {
 		},
 
 		delete: id => {
-
+			return fileApiService.deleteFiles(id).then(ret => ({success: true, ...ret}))
 		}
 	},
 	{
@@ -36,15 +36,17 @@ function fileMgrService(fileApiService) {
 				throw ret
 			})
 		},
+
 		upload: function(file) {
 			return fileApiService.singleUpload(file)
 			.then(ret => {
 				if (ret.success) {
 					ret.entity = this.worker.append(ret.entity)
+					return ret
 				}
 				throw ret
 			})
-		}
+		},
 	});
 }
 

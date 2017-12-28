@@ -31,6 +31,9 @@ export function Worker(entities, model) {
 	};
 
 	this.delete = id => {
+		if (Array.isArray(id)) {
+			return id.map(this.delete.bind(this))
+		}
 		var index = entities.findIndex(cur => cur.id == id);
 		if (index == -1)
 			return (false);
