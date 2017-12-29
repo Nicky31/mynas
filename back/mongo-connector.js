@@ -8,6 +8,7 @@ module.exports = async () => {
   const db = await MongoClient.connect(MONGO_URL);
   return {
   	Files: db.collection('files'),
+  	FileLocations: db.collection('file_locations'),
   	Users: db.collection('users')
   };
 }

@@ -58,14 +58,13 @@ const connectMongo = require('./mongo-connector');
 	    	return res.status(400).send('No files were uploaded.');
 	    var upload = req.files.file
 	    var fileInfos = {
-	    	folderId: req.body.folderId,
+	    	path: req.body.path,
 	    	filename: upload.name,
 	    	mime: upload.mimetype,
 	    	size: upload.data.length
 	    }
-
 	    const uploaded = await services.FileService.createFile(fileInfos, req.user)
-	    return upload.mv(uploaded.filepath)
+	    return upload.mv(uploaded.realPath)
 	    .then(ret => {
 	    	return res.json({file: uploaded})
 	    })

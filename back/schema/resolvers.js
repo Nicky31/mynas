@@ -2,8 +2,7 @@ var files = []
 module.exports = {
   Query: {
     allFiles: async (root, data, {user, services: {FileService}}) => {
-      const query = {folderId: data.folderId}
-      return FileService.findFiles(query, user)
+      return FileService.findFiles({path: (data.path || ['/'])}, user)
     },
   },
 
@@ -13,10 +12,7 @@ module.exports = {
     },
 
     createFolder: async (root, data, {user, services: {FileService}}) => {
-      return FileService.createFolder({
-        filename: data.name,
-        folderId: data.folderId
-      }, user)
+      return FileService.createFolder(data, user)
     },
 
     deleteFiles: async (root, data, {user, services: {FileService}}) => {
@@ -30,6 +26,8 @@ module.exports = {
 
   File: {
     id: root => root._id || root.id, // 5
+
+    userPath: (root, data) => root.path
   },
   User: {
     id: root => root._id || root.id

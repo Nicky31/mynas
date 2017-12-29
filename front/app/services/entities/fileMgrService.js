@@ -26,8 +26,8 @@ function fileMgrService(fileApiService) {
 		}
 	},
 	{
-		findFiles: function(folderId) {
-			return fileApiService.fetchAllFiles(folderId)
+		findFiles: function(path) {
+			return fileApiService.fetchAllFiles(path)
 			.then(ret => {
 				if (ret && ret.success) {
 					ret.entity = this.worker.append(ret.entity)
@@ -37,8 +37,8 @@ function fileMgrService(fileApiService) {
 			})
 		},
 
-		upload: function(file) {
-			return fileApiService.singleUpload(file)
+		upload: function(file, path) {
+			return fileApiService.singleUpload(file, path)
 			.then(ret => {
 				if (ret.success) {
 					ret.entity = this.worker.append(ret.entity)
@@ -48,8 +48,8 @@ function fileMgrService(fileApiService) {
 			})
 		},
 
-		createFolder: function(name, parentId) {
-			return fileApiService.createFolder(name, parentId)
+		createFolder: function(name, path) {
+			return fileApiService.createFolder(name, path)
 			.then(ret => {
 				if (ret.success) {
 					ret.entity = this.worker.append(ret.entity)

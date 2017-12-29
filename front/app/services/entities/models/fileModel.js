@@ -44,9 +44,9 @@ export default new EntityModel('File', {
 
 	filename: {},
 
-	filepath: {},
+	realPath: {},
 
-	folderId: {},
+	userPath: {},
 	
 	mime: {},
 

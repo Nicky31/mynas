@@ -15,19 +15,19 @@ function fileApiService(apiService, $http) {
   this.deleteFiles        = deleteFiles;
   this.createFolder       = createFolder;
 
-  function fetchAllFiles(folderId) {
-    return apiService.graphql({query: `query ($folderId: String){
-      allFiles(folderId: $folderId) {
+  function fetchAllFiles(path = ['/']) {
+    return apiService.graphql({query: `query ($path: [String!]!){
+      allFiles(path: $path) {
         id
         filename
-        filepath
+        realPath
+        userPath
         mime
-        folderId
         size
         updatedAt
         directory
       }
-    }`, variables: {folderId}})
+    }`, variables: {path}})
     .then(ret => {
       if (ret.data && ret.data.allFiles) {
         return ({
@@ -39,9 +39,13 @@ function fileApiService(apiService, $http) {
     })
   }
 
-  function singleUpload(file, folderId) {
+  function singleUpload(file, path) {
+    console.log('sending ' + JSON.stringify({
+      path,
+      file
+    }))
     return apiService.postFile('upload', {
-      folderId,
+      path,
       file
     })
     .then(ret => {
@@ -55,21 +59,20 @@ function fileApiService(apiService, $http) {
     })
   }
 
-  function createFolder(name, parentId) {
+  function createFolder(name, path) {
     return apiService.graphql({query: `
-      mutation createFolder($name: String!, $parentId: ID) {
-        createFolder(name: $name, parentId: $parentId) {
+      mutation createFolder($name: String!, $path: [String!]!) {
+        createFolder(name: $name, path: $path) {
           id
           filename
-          filepath
+          userPath
           mime
-          folderId
           size
           updatedAt
           directory
         }
       }`,
-      variables: {name, parentId}
+      variables: {name, path}
     })
     .then(ret => {
       if (ret.data) {

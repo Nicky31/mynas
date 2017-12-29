@@ -6,26 +6,26 @@ const resolvers = require('./resolvers');
 const typeDefs = `
 
 type Query {
-  allFiles(folderId: String): [File!]!
+  allFiles(path: [String!]!): [File!]!
 }
 
 type Mutation {
-  createFile(filename: String!, mime: String!, size: Int!, folderId: ID): File!
-  createFolder(name: String!, parentId: ID): File!
+  createFile(filename: String!, mime: String!, size: Int!, path: [String!]!): File!
+  createFolder(name: String!, path: [String!]!): File!
   deleteFiles(fileIds: [ID!]!): Boolean
   createUser(name: String!, credentials: AuthInputDatas!): User
 }
 
 type File {
   id: ID!
+  realPath: String!
+  userPath: [String!]!
   filename: String!
-  filepath: String!
   mime: String!
-  folderId: ID
   size: Int!
   updatedAt: String!
   ownerId: ID!
-  directory: Boolean
+  directory: Boolean!
 }
 
 type User {

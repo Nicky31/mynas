@@ -1,4 +1,5 @@
 'use strict';
+import _ from 'underscore'
 
 FilesCtrl.$inject = ['$rootScope', '$scope', 'fileMgrService', 'utilService', '$async']
 const sidebarWidgets = [
@@ -6,7 +7,7 @@ const sidebarWidgets = [
 ]
 
 export default function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async) {
-	$scope.cwd = [] // Current working directory path
+	$scope.cwd = ['/'] // Current working directory path
 	$rootScope.global.breadcrumb = [{iconClassname: 'fa fa-home'}]
 	$scope.viewMode = 'all'
 	$rootScope.global.sidebar.setLinks([
@@ -67,9 +68,10 @@ export default function FilesCtrl($rootScope, $scope, fileMgrService, utilServic
 		)
 	}
 	function refreshFiles() {
-		const cwd = $scope.cwd.last()
-		$scope.files = cwd	? $rootScope.allFiles.filter(cur => cur.folderId == cwd)
-							: $rootScope.allFiles
+		if (!$rootScope.allFiles)
+			return
+		$scope.files = $scope.cwd	? $rootScope.allFiles.filter(cur => _.isEqual(cur.userPath, $scope.cwd))
+									: $rootScope.allFiles
 		if ($scope.files)
 			$scope.files.sort((a, b) => a.directory ? -1 : 1)
 	}
@@ -102,7 +104,7 @@ export default function FilesCtrl($rootScope, $scope, fileMgrService, utilServic
 	  	if (file && (!errFiles || !errFiles.length)) {
 			$async(async function() {
 				try {
-					const upload = await fileMgrService.upload(file)
+					const upload = await fileMgrService.upload(file, $scope.cwd)
 					$rootScope.allFiles = fileMgrService.worker.findAll()
 				} catch (error) {
 					console.log('got error :' + JSON.stringify(error))
