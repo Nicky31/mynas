@@ -6,13 +6,15 @@ const sidebarWidgets = [
 	{include: './views/files/sidebarWidgets.html'}
 ]
 
+const sidebarLinks = [
+	{iconClassname: 'fa fa-folder', name: 'Tous les fichiers', action: () => $scope.viewMode = 'all'},
+]
+
 export default function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async) {
 	$scope.cwd = ['/'] // Current working directory path
 	$rootScope.global.breadcrumb = [{iconClassname: 'fa fa-home'}]
 	$scope.viewMode = 'all'
-	$rootScope.global.sidebar.setLinks([
-		{iconClassname: 'fa fa-folder', name: 'Tous les fichiers', action: () => $scope.viewMode = 'all'},
-	])
+	$rootScope.global.sidebar.setLinks(sidebarLinks)
 	$rootScope.global.sidebar.setWidgets(sidebarWidgets)
 
 	$scope.selection = {
@@ -20,9 +22,9 @@ export default function FilesCtrl($rootScope, $scope, fileMgrService, utilServic
 		totalSize: 0
 	}
 	$scope.files = []
-	$rootScope.$watch('allFiles', allFiles => {
+	$rootScope.$watch('allFiles', (allFiles, oldVal) => {
 		refreshFiles()
-	})
+	})		
 
 	$scope.toggleSelect = file => {
 		if (file == true) {
@@ -44,6 +46,17 @@ export default function FilesCtrl($rootScope, $scope, fileMgrService, utilServic
 
 	$scope.toggleFavourite = file => {
 		file.favourite = !file.favourite
+	}
+
+	$scope.select = file => {
+		if (file.directory) {
+			$scope.cwd.push(file.filename)
+			console.log('cwd =  ' + JSON.stringify($scope.cwd))
+			$rootScope.$emit('OnFilesWorkingDirectoryChange', $scope.cwd)
+			fileMgrService.findFiles($scope.cwd).then(ret => {
+				$rootScope.allFiles = ret.entity
+			})
+		}
 	}
 
 	$scope.downloadSelection = () => {
@@ -74,43 +87,6 @@ export default function FilesCtrl($rootScope, $scope, fileMgrService, utilServic
 									: $rootScope.allFiles
 		if ($scope.files)
 			$scope.files.sort((a, b) => a.directory ? -1 : 1)
-	}
-
-	/*
-	 * Widgets 
-	 */
-	$scope.newFolder = {
-		name: false
-	}
-
-	$scope.submitNewFolder = () => {
-		console.log('creating folder ' + $scope.newFolder.name)	
-		$async(async function() {
-			try {
-				const cwd = $scope.cwd.last()
-				const folder = await fileMgrService.createFolder($scope.newFolder.name, cwd)
-				console.log('created foler ' + JSON.stringify(folder))
-				$rootScope.allFiles = fileMgrService.worker.findAll()
-			} catch (error) {
-				console.log('error on new folder ' + JSON.stringify(error))
-			}
-			$scope.newFolder.name = ''
-		})()
-	}
-
-	$scope.openUploadWindow = () => document.getElementById('uploadFileForm').click()
-
-	$scope.uploadFile = async (file, errFiles) => {
-	  	if (file && (!errFiles || !errFiles.length)) {
-			$async(async function() {
-				try {
-					const upload = await fileMgrService.upload(file, $scope.cwd)
-					$rootScope.allFiles = fileMgrService.worker.findAll()
-				} catch (error) {
-					console.log('got error :' + JSON.stringify(error))
-				}
-			})();
-		}
 	}
 }
 

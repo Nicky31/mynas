@@ -23,6 +23,7 @@ import SidebarCtrl from './controllers/SidebarCtrl.js'
 import HomeCtrl from './controllers/HomeCtrl.js'
 import LoginCtrl from './controllers/LoginCtrl.js'
 import FilesCtrl from './controllers/FilesCtrl.js'
+import FilePageWidgetsCtrl from './controllers/FilePageWidgetsCtrl.js'
 import AgendaCtrl from './controllers/AgendaCtrl.js'
 import NotesCtrl from './controllers/NotesCtrl.js'
 
@@ -40,6 +41,7 @@ app
 	.controller('HomeCtrl', HomeCtrl)
 	.controller('LoginCtrl', LoginCtrl)
 	.controller('FilesCtrl', FilesCtrl)
+	.controller('FilePageWidgetsCtrl', FilePageWidgetsCtrl)
 	.controller('AgendaCtrl', AgendaCtrl)
 	.controller('NotesCtrl', NotesCtrl)
 	.controller('SidebarCtrl', SidebarCtrl)
