@@ -10,7 +10,6 @@ function userMgrService(userApiService) {
 			handler: function(user, pwd) {
 				return userApiService.login(user, pwd)
 				.then(ret => {
-					console.log('out ' + JSON.stringify(ret))
 					var user = this.task('InsertEntity', ret.result)
 					this.myUser = user
 					return user

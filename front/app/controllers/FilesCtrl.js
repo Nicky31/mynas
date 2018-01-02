@@ -1,7 +1,7 @@
 'use strict';
 import _ from 'underscore'
 
-FilesCtrl.$inject = ['$rootScope', '$scope', 'fileMgrService', 'utilService', '$async', '$routeParams']
+FilesCtrl.$inject = ['$rootScope', '$scope', 'fileMgrService', 'utilService', '$async', '$routeParams', '$location']
 const sidebarWidgets = [
 	{include: './views/files/sidebarWidgets.html'}
 ]
@@ -10,8 +10,9 @@ const sidebarLinks = [
 	{iconClassname: 'fa fa-folder', name: 'Tous les fichiers', action: () => $scope.viewMode = 'all'},
 ]
 
-export default function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async, $routeParams) {
+export default function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async, $routeParams, $location) {
 	$scope.cwd = $routeParams.path && $routeParams.path.length ? ['/', ...$routeParams.path.split('/')] : ['/'] // Current working directory path
+	$rootScope.$emit('OnFilesWorkingDirectoryChange', $scope.cwd) // Needed by file sidemenu widgets
 	$scope.selection = {
 		fileIds: [],
 		totalSize: 0
@@ -25,15 +26,6 @@ export default function FilesCtrl($rootScope, $scope, fileMgrService, utilServic
 	$rootScope.$watch('allFiles', (allFiles, oldVal) => {
 		refreshFiles()
 	})		
-
-	$rootScope.$on('OnFilesWorkingDirectoryChange', (evt, cwd) => {
-		$scope.cwd = cwd
-		console.log('cwd =  ' + JSON.stringify($scope.cwd))
-		buildBreadcrumb()
-		fileMgrService.task('ReadDir', $scope.cwd).then(ret => {
-			$rootScope.allFiles = ret
-		})
-	})
 
 	refreshFiles()
 
@@ -71,7 +63,7 @@ export default function FilesCtrl($rootScope, $scope, fileMgrService, utilServic
 
 	$scope.select = file => {
 		if (file.directory) {
-			$rootScope.$emit('OnFilesWorkingDirectoryChange', [...$scope.cwd, file.filename])
+			$location.url("/files/" + [...$scope.cwd, file.filename].slice(1).join('/'))
 		}
 	}
 
@@ -105,13 +97,14 @@ export default function FilesCtrl($rootScope, $scope, fileMgrService, utilServic
 		}
 
 		if (!$scope.files.length && !fileMgrService.getLastTask('ReadDir', $scope.cwd)) {
-			var filesReq = await fileMgrService.task('ReadDir', $scope.cwd)
-			if (!filesReq)
-				return 
-			$rootScope.allFiles = [...$rootScope.allFiles, ...filesReq]
-		} 
+			$async(async function() {
+				var filesReq = await fileMgrService.task('ReadDir', $scope.cwd)
+				if (!filesReq)
+					return 
+				$rootScope.allFiles = [...$rootScope.allFiles, ...filesReq]
+			})()
+		}
 	}
-
 }
 
 

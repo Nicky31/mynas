@@ -105,7 +105,7 @@ export default function EntityManager(entityModel, tasks, customMethods) {
 	// Tasks handling
 	this.taskId = (taskArgs) => {
 		const tab = Array.from(taskArgs)
-		return tab.slice(0, this.tasks[tab[0]].params.length).map(JSON.stringify).join('_')
+		return tab.slice(0, this.tasks[tab[0]].params.length + 1).map(JSON.stringify).join('_')
 	}
 
 	this.task = function(name) {

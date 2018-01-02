@@ -7,7 +7,7 @@ function fileMgrService(fileApiService) {
 	{
 		Delete: {
 			params: ['id'],
-			handler: (id) => function() {
+			handler: function(id) {
 				return fileApiService.deleteFiles(id).then(() => this.task('DeleteEntity', id))
 			}
 		},

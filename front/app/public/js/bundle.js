@@ -310,10 +310,6 @@ var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
-var _stringify = require('babel-runtime/core-js/json/stringify');
-
-var _stringify2 = _interopRequireDefault(_stringify);
-
 var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
 
 var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
@@ -326,20 +322,19 @@ var _underscore2 = _interopRequireDefault(_underscore);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-FilesCtrl.$inject = ['$rootScope', '$scope', 'fileMgrService', 'utilService', '$async', '$routeParams'];
+FilesCtrl.$inject = ['$rootScope', '$scope', 'fileMgrService', 'utilService', '$async', '$routeParams', '$location'];
 var sidebarWidgets = [{ include: './views/files/sidebarWidgets.html' }];
 
 var sidebarLinks = [{ iconClassname: 'fa fa-folder', name: 'Tous les fichiers', action: function action() {
 		return $scope.viewMode = 'all';
 	} }];
 
-function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async, $routeParams) {
+function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async, $routeParams, $location) {
 	var refreshFiles = function () {
-		var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2() {
-			var filesReq;
-			return _regenerator2.default.wrap(function _callee2$(_context2) {
+		var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3() {
+			return _regenerator2.default.wrap(function _callee3$(_context3) {
 				while (1) {
-					switch (_context2.prev = _context2.next) {
+					switch (_context3.prev = _context3.next) {
 						case 0:
 							if ($rootScope.allFiles) {
 								$scope.files = $scope.cwd ? $rootScope.allFiles.filter(function (cur) {
@@ -350,33 +345,44 @@ function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async, $rou
 								});
 							}
 
-							if (!(!$scope.files.length && !fileMgrService.getLastTask('ReadDir', $scope.cwd))) {
-								_context2.next = 8;
-								break;
+							if (!$scope.files.length && !fileMgrService.getLastTask('ReadDir', $scope.cwd)) {
+								$async((0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2() {
+									var filesReq;
+									return _regenerator2.default.wrap(function _callee2$(_context2) {
+										while (1) {
+											switch (_context2.prev = _context2.next) {
+												case 0:
+													_context2.next = 2;
+													return fileMgrService.task('ReadDir', $scope.cwd);
+
+												case 2:
+													filesReq = _context2.sent;
+
+													if (filesReq) {
+														_context2.next = 5;
+														break;
+													}
+
+													return _context2.abrupt('return');
+
+												case 5:
+													$rootScope.allFiles = [].concat((0, _toConsumableArray3.default)($rootScope.allFiles), (0, _toConsumableArray3.default)(filesReq));
+
+												case 6:
+												case 'end':
+													return _context2.stop();
+											}
+										}
+									}, _callee2, this);
+								})))();
 							}
 
-							_context2.next = 4;
-							return fileMgrService.task('ReadDir', $scope.cwd);
-
-						case 4:
-							filesReq = _context2.sent;
-
-							if (filesReq) {
-								_context2.next = 7;
-								break;
-							}
-
-							return _context2.abrupt('return');
-
-						case 7:
-							$rootScope.allFiles = [].concat((0, _toConsumableArray3.default)($rootScope.allFiles), (0, _toConsumableArray3.default)(filesReq));
-
-						case 8:
+						case 2:
 						case 'end':
-							return _context2.stop();
+							return _context3.stop();
 					}
 				}
-			}, _callee2, this);
+			}, _callee3, this);
 		}));
 
 		return function refreshFiles() {
@@ -385,6 +391,7 @@ function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async, $rou
 	}();
 
 	$scope.cwd = $routeParams.path && $routeParams.path.length ? ['/'].concat((0, _toConsumableArray3.default)($routeParams.path.split('/'))) : ['/']; // Current working directory path
+	$rootScope.$emit('OnFilesWorkingDirectoryChange', $scope.cwd); // Needed by file sidemenu widgets
 	$scope.selection = {
 		fileIds: [],
 		totalSize: 0
@@ -397,15 +404,6 @@ function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async, $rou
 	buildBreadcrumb();
 	$rootScope.$watch('allFiles', function (allFiles, oldVal) {
 		refreshFiles();
-	});
-
-	$rootScope.$on('OnFilesWorkingDirectoryChange', function (evt, cwd) {
-		$scope.cwd = cwd;
-		console.log('cwd =  ' + (0, _stringify2.default)($scope.cwd));
-		buildBreadcrumb();
-		fileMgrService.task('ReadDir', $scope.cwd).then(function (ret) {
-			$rootScope.allFiles = ret;
-		});
 	});
 
 	refreshFiles();
@@ -449,7 +447,7 @@ function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async, $rou
 
 	$scope.select = function (file) {
 		if (file.directory) {
-			$rootScope.$emit('OnFilesWorkingDirectoryChange', [].concat((0, _toConsumableArray3.default)($scope.cwd), [file.filename]));
+			$location.url("/files/" + [].concat((0, _toConsumableArray3.default)($scope.cwd), [file.filename]).slice(1).join('/'));
 		}
 	};
 
@@ -497,7 +495,7 @@ function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async, $rou
 	}
 }
 
-},{"babel-runtime/core-js/json/stringify":33,"babel-runtime/helpers/asyncToGenerator":40,"babel-runtime/helpers/toConsumableArray":43,"babel-runtime/regenerator":45,"underscore":148}],7:[function(require,module,exports){
+},{"babel-runtime/helpers/asyncToGenerator":40,"babel-runtime/helpers/toConsumableArray":43,"babel-runtime/regenerator":45,"underscore":148}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -887,6 +885,7 @@ function fileApiService(apiService, $http) {
   }
 
   function deleteFiles(fileIds) {
+    console.log('gonna delete ' + fileIds);
     return apiService.graphql({ query: '\n      mutation deleteFiles($fileIds: [ID!]!) {\n        deleteFiles(fileIds: $fileIds)\n      }',
       variables: { fileIds: fileIds }
     });
@@ -950,13 +949,11 @@ function fileMgrService(fileApiService) {
 		Delete: {
 			params: ['id'],
 			handler: function handler(id) {
-				return function () {
-					var _this = this;
+				var _this = this;
 
-					return fileApiService.deleteFiles(id).then(function () {
-						return _this.task('DeleteEntity', id);
-					});
-				};
+				return fileApiService.deleteFiles(id).then(function () {
+					return _this.task('DeleteEntity', id);
+				});
 			}
 		},
 
@@ -1146,7 +1143,7 @@ function EntityManager(entityModel, tasks, customMethods) {
 	// Tasks handling
 	this.taskId = function (taskArgs) {
 		var tab = (0, _from2.default)(taskArgs);
-		return tab.slice(0, _this2.tasks[tab[0]].params.length).map(_stringify2.default).join('_');
+		return tab.slice(0, _this2.tasks[tab[0]].params.length + 1).map(_stringify2.default).join('_');
 	};
 
 	this.task = function (name) {
@@ -1509,10 +1506,6 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
-var _stringify = require('babel-runtime/core-js/json/stringify');
-
-var _stringify2 = _interopRequireDefault(_stringify);
-
 var _EntityManager = require('./lib/EntityManager');
 
 var _EntityManager2 = _interopRequireDefault(_EntityManager);
@@ -1532,7 +1525,6 @@ function userMgrService(userApiService) {
 				var _this = this;
 
 				return userApiService.login(user, pwd).then(function (ret) {
-					console.log('out ' + (0, _stringify2.default)(ret));
 					var user = _this.task('InsertEntity', ret.result);
 					_this.myUser = user;
 					return user;
@@ -1543,7 +1535,7 @@ function userMgrService(userApiService) {
 }
 exports.default = userMgrService;
 
-},{"./lib/EntityManager":17,"./models/userModel":21,"babel-runtime/core-js/json/stringify":33}],23:[function(require,module,exports){
+},{"./lib/EntityManager":17,"./models/userModel":21}],23:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
