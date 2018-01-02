@@ -2,43 +2,23 @@ import EntityManager from './lib/EntityManager';
 import userModel from './models/userModel';
 
 userMgrService.$inject = ['userApiService'];
-
 function userMgrService(userApiService) {
 	return new EntityManager(userModel,
 	{
-		fetchOne: ({id}) => {
-			// return userApiService.getProfile(id)
-		},
-
-		fetchAll: () => {
-
-		},
-
-		update: entity => {
-
-		},
-
-		insert: entity => {
-
-		},
-
-		delete: id => {
-
+		Login: {
+			params: ['user', 'pwd'],
+			handler: function(user, pwd) {
+				return userApiService.login(user, pwd)
+				.then(ret => {
+					console.log('out ' + JSON.stringify(ret))
+					var user = this.task('InsertEntity', ret.result)
+					this.myUser = user
+					return user
+				})
+			}
 		}
-	},
-	{
-		login: function (user, pwd) {
-			return userApiService.login(user, pwd)
-			.then(ret => {
-				if (ret.success) {
-					ret.entity = ret.entity.user;
-					ret.entity = this.worker.append(ret.entity);
-					this.myUser = ret.entity;
-				}
-				return ret
-			})
-		}
-	});
+	})
 }
+export default userMgrService
 
-export default userMgrService;
+

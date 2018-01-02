@@ -10,7 +10,7 @@ const router = new Router(function(datas) {
 			templateUrl: 'views/home/index.html',
 			controller: 'HomeCtrl'
 		})
-		.route('/files', {
+		.route('/files/:path*?', {
 			templateUrl: 'views/files/index.html',
 			controller: 'FilesCtrl'
 		})

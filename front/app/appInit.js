@@ -7,6 +7,7 @@ function AppInit($rootScope, utilService, userMgrService, fileMgrService, $async
 		breadcrumb: [{txt: "OwnSpace"}],
 		user: false,
 	};
+	$rootScope.allFiles = []
 
 	$rootScope.logout = () => {
 		utilService.destroySession()
@@ -20,15 +21,6 @@ function AppInit($rootScope, utilService, userMgrService, fileMgrService, $async
 		$rootScope.global.user = user;
 		console.log('user = ' + JSON.stringify(user))
 	}
-
-	$async(async function() {
-		try {
-			var filesReq = await fileMgrService.findFiles()
-			$rootScope.allFiles = filesReq.entity
-		} catch (error) {
-			console.log('error on fetch files : ' + JSON.stringify(error))
-		}
-	})();
 };
 
 export default AppInit;

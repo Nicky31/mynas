@@ -31,8 +31,7 @@ function fileApiService(apiService, $http) {
     .then(ret => {
       if (ret.data && ret.data.allFiles) {
         return ({
-          success: true,
-          entity: ret.data.allFiles
+          result: ret.data.allFiles
         })
       }
       throw ret
@@ -51,8 +50,7 @@ function fileApiService(apiService, $http) {
     .then(ret => {
       if (ret.data && ret.data.file) {        
         return {
-          success: true,
-          entity: ret.data.file
+          result: ret.data.file
         }
       }
       throw ret
@@ -77,8 +75,7 @@ function fileApiService(apiService, $http) {
     .then(ret => {
       if (ret.data) {
         return {
-          success: true,
-          entity: ret.data.createFolder
+          result: ret.data.createFolder
         }
       }
       throw ret

@@ -1,7 +1,7 @@
 'use strict';
 import _ from 'underscore'
 
-FilesCtrl.$inject = ['$rootScope', '$scope', 'fileMgrService', 'utilService', '$async']
+FilesCtrl.$inject = ['$rootScope', '$scope', 'fileMgrService', 'utilService', '$async', '$routeParams']
 const sidebarWidgets = [
 	{include: './views/files/sidebarWidgets.html'}
 ]
@@ -10,21 +10,42 @@ const sidebarLinks = [
 	{iconClassname: 'fa fa-folder', name: 'Tous les fichiers', action: () => $scope.viewMode = 'all'},
 ]
 
-export default function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async) {
-	$scope.cwd = ['/'] // Current working directory path
-	$rootScope.global.breadcrumb = [{iconClassname: 'fa fa-home'}]
-	$scope.viewMode = 'all'
-	$rootScope.global.sidebar.setLinks(sidebarLinks)
-	$rootScope.global.sidebar.setWidgets(sidebarWidgets)
-
+export default function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async, $routeParams) {
+	$scope.cwd = $routeParams.path && $routeParams.path.length ? ['/', ...$routeParams.path.split('/')] : ['/'] // Current working directory path
 	$scope.selection = {
 		fileIds: [],
 		totalSize: 0
 	}
 	$scope.files = []
+	$scope.viewMode = 'all'
+
+	$rootScope.global.sidebar.setLinks(sidebarLinks)
+	$rootScope.global.sidebar.setWidgets(sidebarWidgets)
+	buildBreadcrumb()
 	$rootScope.$watch('allFiles', (allFiles, oldVal) => {
 		refreshFiles()
 	})		
+
+	$rootScope.$on('OnFilesWorkingDirectoryChange', (evt, cwd) => {
+		$scope.cwd = cwd
+		console.log('cwd =  ' + JSON.stringify($scope.cwd))
+		buildBreadcrumb()
+		fileMgrService.task('ReadDir', $scope.cwd).then(ret => {
+			$rootScope.allFiles = ret
+		})
+	})
+
+	refreshFiles()
+
+	function buildBreadcrumb() {
+		var curPath = ''
+		$rootScope.global.breadcrumb = $scope.cwd.map(dir => {
+			curPath += (dir != '/' ? ('/' + dir) : '')
+			if (dir == '/')
+				return {iconClassname: 'fa fa-home', href: "#!/files"}
+			return {txt: dir, href: "#!/files" + curPath}
+		})
+	}
 
 	$scope.toggleSelect = file => {
 		if (file == true) {
@@ -50,12 +71,7 @@ export default function FilesCtrl($rootScope, $scope, fileMgrService, utilServic
 
 	$scope.select = file => {
 		if (file.directory) {
-			$scope.cwd.push(file.filename)
-			console.log('cwd =  ' + JSON.stringify($scope.cwd))
-			$rootScope.$emit('OnFilesWorkingDirectoryChange', $scope.cwd)
-			fileMgrService.findFiles($scope.cwd).then(ret => {
-				$rootScope.allFiles = ret.entity
-			})
+			$rootScope.$emit('OnFilesWorkingDirectoryChange', [...$scope.cwd, file.filename])
 		}
 	}
 
@@ -66,7 +82,7 @@ export default function FilesCtrl($rootScope, $scope, fileMgrService, utilServic
 	$scope.deleteSelection = () => {
 		$async(async function() {
 			try {
-				const ret = await fileMgrService.delete($scope.selection.fileIds)
+				await fileMgrService.task('Delete', $scope.selection.fileIds)
 				$scope.selection.fileIds = []
 				$rootScope.allFiles = fileMgrService.worker.findAll()
 			} catch (error) {
@@ -80,14 +96,22 @@ export default function FilesCtrl($rootScope, $scope, fileMgrService, utilServic
 			$scope.files.filter(cur => $scope.selection.fileIds.includes(cur.id)).reduce((totalSize, curFile) => (totalSize  + curFile.size), 0)
 		)
 	}
-	function refreshFiles() {
-		if (!$rootScope.allFiles)
-			return
-		$scope.files = $scope.cwd	? $rootScope.allFiles.filter(cur => _.isEqual(cur.userPath, $scope.cwd))
-									: $rootScope.allFiles
-		if ($scope.files)
-			$scope.files.sort((a, b) => a.directory ? -1 : 1)
+
+	async function refreshFiles() {
+		if ($rootScope.allFiles) {
+			$scope.files = $scope.cwd	? $rootScope.allFiles.filter(cur => _.isEqual(cur.userPath, $scope.cwd))
+										: $rootScope.allFiles
+			$scope.files.sort((a, b) => a.directory ? -1 : 1)			
+		}
+
+		if (!$scope.files.length && !fileMgrService.getLastTask('ReadDir', $scope.cwd)) {
+			var filesReq = await fileMgrService.task('ReadDir', $scope.cwd)
+			if (!filesReq)
+				return 
+			$rootScope.allFiles = [...$rootScope.allFiles, ...filesReq]
+		} 
 	}
+
 }
 
 

@@ -64,8 +64,11 @@
             <ol class="breadcrumb" breadcrumb>
                 <ncy-breadcrumb></ncy-breadcrumb>
                 <li class="breadcrumb-item" ng-repeat="bc in global.breadcrumb">
-                    <span ng-if="bc.txt">{{bc.txt}}</span>
-                    <i style="font-size: 20px;" ng-if="bc.iconClassname" ng-class="bc.iconClassname"></i>
+                    <span ng-if="bc.txt && bc.href"><a href="{{bc.href}}">{{bc.txt}}</a></span>
+                    <span ng-if="bc.txt && !bc.href">{{bc.txt}}</span>
+                    <a href="{{bc.href}}"}}>
+                        <i style="font-size: 20px;" ng-if="bc.iconClassname" ng-class="bc.iconClassname"></i>
+                    </a>
                 </li>
                 <!-- Breadcrumb Menu-->
                 <li class="breadcrumb-menu">

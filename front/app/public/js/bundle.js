@@ -105,14 +105,6 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
-var _regenerator = require('babel-runtime/regenerator');
-
-var _regenerator2 = _interopRequireDefault(_regenerator);
-
-var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
-
-var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
-
 var _stringify = require('babel-runtime/core-js/json/stringify');
 
 var _stringify2 = _interopRequireDefault(_stringify);
@@ -126,6 +118,7 @@ function AppInit($rootScope, utilService, userMgrService, fileMgrService, $async
 		breadcrumb: [{ txt: "OwnSpace" }],
 		user: false
 	};
+	$rootScope.allFiles = [];
 
 	$rootScope.logout = function () {
 		utilService.destroySession();
@@ -139,42 +132,11 @@ function AppInit($rootScope, utilService, userMgrService, fileMgrService, $async
 		$rootScope.global.user = user;
 		console.log('user = ' + (0, _stringify2.default)(user));
 	}
-
-	$async((0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee() {
-		var filesReq;
-		return _regenerator2.default.wrap(function _callee$(_context) {
-			while (1) {
-				switch (_context.prev = _context.next) {
-					case 0:
-						_context.prev = 0;
-						_context.next = 3;
-						return fileMgrService.findFiles();
-
-					case 3:
-						filesReq = _context.sent;
-
-						$rootScope.allFiles = filesReq.entity;
-						_context.next = 10;
-						break;
-
-					case 7:
-						_context.prev = 7;
-						_context.t0 = _context['catch'](0);
-
-						console.log('error on fetch files : ' + (0, _stringify2.default)(_context.t0));
-
-					case 10:
-					case 'end':
-						return _context.stop();
-				}
-			}
-		}, _callee, this, [[0, 7]]);
-	})))();
 };
 
 exports.default = AppInit;
 
-},{"babel-runtime/core-js/json/stringify":33,"babel-runtime/helpers/asyncToGenerator":40,"babel-runtime/regenerator":45}],3:[function(require,module,exports){
+},{"babel-runtime/core-js/json/stringify":33}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -217,15 +179,19 @@ var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
+var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
+
+var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
+
 exports.default = FilePageWidgetsCtrl;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-FilePageWidgetsCtrl.$inject = ['$rootScope', '$scope', '$async', 'fileMgrService'];
-function FilePageWidgetsCtrl($rootScope, $scope, $async, fileMgrService) {
+FilePageWidgetsCtrl.$inject = ['$rootScope', '$scope', '$async', 'fileMgrService', '$routeParams'];
+function FilePageWidgetsCtrl($rootScope, $scope, $async, fileMgrService, $routeParams) {
 	var _this = this;
 
-	$scope.cwd = ['/'];
+	$scope.cwd = $routeParams.path && $routeParams.path.length ? ['/'].concat((0, _toConsumableArray3.default)($routeParams.path.split('/'))) : ['/'];
 
 	$scope.newFolder = {
 		name: false
@@ -244,7 +210,7 @@ function FilePageWidgetsCtrl($rootScope, $scope, $async, fileMgrService) {
 						case 0:
 							_context.prev = 0;
 							_context.next = 3;
-							return fileMgrService.createFolder($scope.newFolder.name, $scope.cwd);
+							return fileMgrService.task('CreateFolder', $scope.newFolder.name, $scope.cwd);
 
 						case 3:
 							folder = _context.sent;
@@ -291,7 +257,7 @@ function FilePageWidgetsCtrl($rootScope, $scope, $async, fileMgrService) {
 												case 0:
 													_context2.prev = 0;
 													_context2.next = 3;
-													return fileMgrService.upload(file, $scope.cwd);
+													return fileMgrService.task('Upload', file, $scope.cwd);
 
 												case 3:
 													upload = _context2.sent;
@@ -329,7 +295,7 @@ function FilePageWidgetsCtrl($rootScope, $scope, $async, fileMgrService) {
 	}();
 }
 
-},{"babel-runtime/core-js/json/stringify":33,"babel-runtime/helpers/asyncToGenerator":40,"babel-runtime/regenerator":45}],6:[function(require,module,exports){
+},{"babel-runtime/core-js/json/stringify":33,"babel-runtime/helpers/asyncToGenerator":40,"babel-runtime/helpers/toConsumableArray":43,"babel-runtime/regenerator":45}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -348,6 +314,10 @@ var _stringify = require('babel-runtime/core-js/json/stringify');
 
 var _stringify2 = _interopRequireDefault(_stringify);
 
+var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
+
+var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
+
 exports.default = FilesCtrl;
 
 var _underscore = require('underscore');
@@ -356,28 +326,98 @@ var _underscore2 = _interopRequireDefault(_underscore);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-FilesCtrl.$inject = ['$rootScope', '$scope', 'fileMgrService', 'utilService', '$async'];
+FilesCtrl.$inject = ['$rootScope', '$scope', 'fileMgrService', 'utilService', '$async', '$routeParams'];
 var sidebarWidgets = [{ include: './views/files/sidebarWidgets.html' }];
 
 var sidebarLinks = [{ iconClassname: 'fa fa-folder', name: 'Tous les fichiers', action: function action() {
 		return $scope.viewMode = 'all';
 	} }];
 
-function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async) {
-	$scope.cwd = ['/']; // Current working directory path
-	$rootScope.global.breadcrumb = [{ iconClassname: 'fa fa-home' }];
-	$scope.viewMode = 'all';
-	$rootScope.global.sidebar.setLinks(sidebarLinks);
-	$rootScope.global.sidebar.setWidgets(sidebarWidgets);
+function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async, $routeParams) {
+	var refreshFiles = function () {
+		var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2() {
+			var filesReq;
+			return _regenerator2.default.wrap(function _callee2$(_context2) {
+				while (1) {
+					switch (_context2.prev = _context2.next) {
+						case 0:
+							if ($rootScope.allFiles) {
+								$scope.files = $scope.cwd ? $rootScope.allFiles.filter(function (cur) {
+									return _underscore2.default.isEqual(cur.userPath, $scope.cwd);
+								}) : $rootScope.allFiles;
+								$scope.files.sort(function (a, b) {
+									return a.directory ? -1 : 1;
+								});
+							}
 
+							if (!(!$scope.files.length && !fileMgrService.getLastTask('ReadDir', $scope.cwd))) {
+								_context2.next = 8;
+								break;
+							}
+
+							_context2.next = 4;
+							return fileMgrService.task('ReadDir', $scope.cwd);
+
+						case 4:
+							filesReq = _context2.sent;
+
+							if (filesReq) {
+								_context2.next = 7;
+								break;
+							}
+
+							return _context2.abrupt('return');
+
+						case 7:
+							$rootScope.allFiles = [].concat((0, _toConsumableArray3.default)($rootScope.allFiles), (0, _toConsumableArray3.default)(filesReq));
+
+						case 8:
+						case 'end':
+							return _context2.stop();
+					}
+				}
+			}, _callee2, this);
+		}));
+
+		return function refreshFiles() {
+			return _ref2.apply(this, arguments);
+		};
+	}();
+
+	$scope.cwd = $routeParams.path && $routeParams.path.length ? ['/'].concat((0, _toConsumableArray3.default)($routeParams.path.split('/'))) : ['/']; // Current working directory path
 	$scope.selection = {
 		fileIds: [],
 		totalSize: 0
 	};
 	$scope.files = [];
+	$scope.viewMode = 'all';
+
+	$rootScope.global.sidebar.setLinks(sidebarLinks);
+	$rootScope.global.sidebar.setWidgets(sidebarWidgets);
+	buildBreadcrumb();
 	$rootScope.$watch('allFiles', function (allFiles, oldVal) {
 		refreshFiles();
 	});
+
+	$rootScope.$on('OnFilesWorkingDirectoryChange', function (evt, cwd) {
+		$scope.cwd = cwd;
+		console.log('cwd =  ' + (0, _stringify2.default)($scope.cwd));
+		buildBreadcrumb();
+		fileMgrService.task('ReadDir', $scope.cwd).then(function (ret) {
+			$rootScope.allFiles = ret;
+		});
+	});
+
+	refreshFiles();
+
+	function buildBreadcrumb() {
+		var curPath = '';
+		$rootScope.global.breadcrumb = $scope.cwd.map(function (dir) {
+			curPath += dir != '/' ? '/' + dir : '';
+			if (dir == '/') return { iconClassname: 'fa fa-home', href: "#!/files" };
+			return { txt: dir, href: "#!/files" + curPath };
+		});
+	}
 
 	$scope.toggleSelect = function (file) {
 		if (file == true) {
@@ -409,12 +449,7 @@ function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async) {
 
 	$scope.select = function (file) {
 		if (file.directory) {
-			$scope.cwd.push(file.filename);
-			console.log('cwd =  ' + (0, _stringify2.default)($scope.cwd));
-			$rootScope.$emit('OnFilesWorkingDirectoryChange', $scope.cwd);
-			fileMgrService.findFiles($scope.cwd).then(function (ret) {
-				$rootScope.allFiles = ret.entity;
-			});
+			$rootScope.$emit('OnFilesWorkingDirectoryChange', [].concat((0, _toConsumableArray3.default)($scope.cwd), [file.filename]));
 		}
 	};
 
@@ -424,35 +459,32 @@ function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async) {
 
 	$scope.deleteSelection = function () {
 		$async((0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee() {
-			var ret;
 			return _regenerator2.default.wrap(function _callee$(_context) {
 				while (1) {
 					switch (_context.prev = _context.next) {
 						case 0:
 							_context.prev = 0;
 							_context.next = 3;
-							return fileMgrService.delete($scope.selection.fileIds);
+							return fileMgrService.task('Delete', $scope.selection.fileIds);
 
 						case 3:
-							ret = _context.sent;
-
 							$scope.selection.fileIds = [];
 							$rootScope.allFiles = fileMgrService.worker.findAll();
-							_context.next = 11;
+							_context.next = 10;
 							break;
 
-						case 8:
-							_context.prev = 8;
+						case 7:
+							_context.prev = 7;
 							_context.t0 = _context['catch'](0);
 
 							console.log('error on delete');
 
-						case 11:
+						case 10:
 						case 'end':
 							return _context.stop();
 					}
 				}
-			}, _callee, this, [[0, 8]]);
+			}, _callee, this, [[0, 7]]);
 		})))();
 	};
 
@@ -463,18 +495,9 @@ function FilesCtrl($rootScope, $scope, fileMgrService, utilService, $async) {
 			return totalSize + curFile.size;
 		}, 0));
 	}
-	function refreshFiles() {
-		if (!$rootScope.allFiles) return;
-		$scope.files = $scope.cwd ? $rootScope.allFiles.filter(function (cur) {
-			return _underscore2.default.isEqual(cur.userPath, $scope.cwd);
-		}) : $rootScope.allFiles;
-		if ($scope.files) $scope.files.sort(function (a, b) {
-			return a.directory ? -1 : 1;
-		});
-	}
 }
 
-},{"babel-runtime/core-js/json/stringify":33,"babel-runtime/helpers/asyncToGenerator":40,"babel-runtime/regenerator":45,"underscore":148}],7:[function(require,module,exports){
+},{"babel-runtime/core-js/json/stringify":33,"babel-runtime/helpers/asyncToGenerator":40,"babel-runtime/helpers/toConsumableArray":43,"babel-runtime/regenerator":45,"underscore":148}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -526,12 +549,12 @@ function LoginCtrl($rootScope, $scope, $async, userMgrService, utilService) {
 						case 0:
 							_context.prev = 0;
 							_context.next = 3;
-							return userMgrService.login($scope.form.email, $scope.form.password);
+							return userMgrService.task('Login', $scope.form.email, $scope.form.password);
 
 						case 3:
 							user = _context.sent;
 
-							if (!(!user || !user.success)) {
+							if (user) {
 								_context.next = 6;
 								break;
 							}
@@ -539,7 +562,7 @@ function LoginCtrl($rootScope, $scope, $async, userMgrService, utilService) {
 							throw { error: 'bad creds' };
 
 						case 6:
-							utilService.storeSession(user.entity);
+							utilService.storeSession(user);
 							window.location.reload();
 							_context.next = 14;
 							break;
@@ -724,7 +747,7 @@ var router = new _Router2.default(function (datas) {
 	}, 'views/member403.html').route('/', { redirectTo: '/home' }).route('/home', {
 		templateUrl: 'views/home/index.html',
 		controller: 'HomeCtrl'
-	}).route('/files', {
+	}).route('/files/:path*?', {
 		templateUrl: 'views/files/index.html',
 		controller: 'FilesCtrl'
 	}).route('/agenda', {
@@ -825,8 +848,7 @@ function fileApiService(apiService, $http) {
     return apiService.graphql({ query: 'query ($path: [String!]!){\n      allFiles(path: $path) {\n        id\n        filename\n        realPath\n        userPath\n        mime\n        size\n        updatedAt\n        directory\n      }\n    }', variables: { path: path } }).then(function (ret) {
       if (ret.data && ret.data.allFiles) {
         return {
-          success: true,
-          entity: ret.data.allFiles
+          result: ret.data.allFiles
         };
       }
       throw ret;
@@ -844,8 +866,7 @@ function fileApiService(apiService, $http) {
     }).then(function (ret) {
       if (ret.data && ret.data.file) {
         return {
-          success: true,
-          entity: ret.data.file
+          result: ret.data.file
         };
       }
       throw ret;
@@ -858,8 +879,7 @@ function fileApiService(apiService, $http) {
     }).then(function (ret) {
       if (ret.data) {
         return {
-          success: true,
-          entity: ret.data.createFolder
+          result: ret.data.createFolder
         };
       }
       throw ret;
@@ -895,11 +915,12 @@ function userService(apiService, $http) {
   function login(email, password) {
     return apiService.post('auth', { email: email, password: password }).then(function (ret) {
       console.log('got ' + (0, _stringify2.default)(ret));
-      if (ret.data) return {
-        success: true,
-        entity: ret.data
-      };
-      return { error: 'Bad login details' };
+      if (ret.data && ret.data.user) {
+        return {
+          result: ret.data.user
+        };
+      }
+      throw ret;
     });
   }
 }
@@ -912,10 +933,6 @@ exports.default = userService;
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
-
-var _extends2 = require('babel-runtime/helpers/extends');
-
-var _extends3 = _interopRequireDefault(_extends2);
 
 var _EntityManager = require('./lib/EntityManager');
 
@@ -930,88 +947,70 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 fileMgrService.$inject = ['fileApiService'];
 function fileMgrService(fileApiService) {
 	return new _EntityManager2.default(_fileModel2.default, {
-		fetchOne: function fetchOne(_ref) {
-			// return fileApiService.getProfile(id)
+		Delete: {
+			params: ['id'],
+			handler: function handler(id) {
+				return function () {
+					var _this = this;
 
-			var id = _ref.id;
+					return fileApiService.deleteFiles(id).then(function () {
+						return _this.task('DeleteEntity', id);
+					});
+				};
+			}
 		},
 
-		fetchAll: function fetchAll() {
-			// return fileApiService.fetchAllFiles()
+		ReadDir: {
+			params: ['path'],
+			handler: function handler(path) {
+				var _this2 = this;
+
+				return fileApiService.fetchAllFiles(path).then(function (ret) {
+					return _this2.task('InsertEntity', ret.result);
+				});
+			}
 		},
 
-		update: function update(entity) {},
+		Upload: {
+			params: ['file', 'path'],
+			handler: function handler(file, path) {
+				var _this3 = this;
 
-		insert: function insert(entity) {},
-
-		delete: function _delete(id) {
-			return fileApiService.deleteFiles(id).then(function (ret) {
-				return (0, _extends3.default)({ success: true }, ret);
-			});
-		}
-	}, {
-		findFiles: function findFiles(path) {
-			var _this = this;
-
-			return fileApiService.fetchAllFiles(path).then(function (ret) {
-				if (ret && ret.success) {
-					ret.entity = _this.worker.append(ret.entity);
-					return ret;
-				}
-				throw ret;
-			});
+				return fileApiService.singleUpload(file, path).then(function (ret) {
+					return _this3.task('InsertEntity', ret.result);
+				});
+			}
 		},
 
-		upload: function upload(file, path) {
-			var _this2 = this;
+		CreateFolder: {
+			params: ['name', 'path'],
+			handler: function handler(name, path) {
+				var _this4 = this;
 
-			return fileApiService.singleUpload(file, path).then(function (ret) {
-				if (ret.success) {
-					ret.entity = _this2.worker.append(ret.entity);
-					return ret;
-				}
-				throw ret;
-			});
-		},
-
-		createFolder: function createFolder(name, path) {
-			var _this3 = this;
-
-			return fileApiService.createFolder(name, path).then(function (ret) {
-				if (ret.success) {
-					ret.entity = _this3.worker.append(ret.entity);
-					return ret;
-				}
-				throw ret;
-			});
+				return fileApiService.createFolder(name, path).then(function (ret) {
+					return _this4.task('InsertEntity', ret.result);
+				});
+			}
 		}
 	});
 }
 
 exports.default = fileMgrService;
 
-},{"./lib/EntityManager":17,"./models/fileModel":20,"babel-runtime/helpers/extends":41}],17:[function(require,module,exports){
+},{"./lib/EntityManager":17,"./models/fileModel":20}],17:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
-var _extends2 = require('babel-runtime/helpers/extends');
+var _stringify = require('babel-runtime/core-js/json/stringify');
 
-var _extends3 = _interopRequireDefault(_extends2);
+var _stringify2 = _interopRequireDefault(_stringify);
 
-var _regenerator = require('babel-runtime/regenerator');
+var _from = require('babel-runtime/core-js/array/from');
 
-var _regenerator2 = _interopRequireDefault(_regenerator);
-
-var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
-
-var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
-
-var _promise = require('babel-runtime/core-js/promise');
-
-var _promise2 = _interopRequireDefault(_promise);
+var _from2 = _interopRequireDefault(_from);
 
 var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
 
@@ -1023,6 +1022,10 @@ var _keys2 = _interopRequireDefault(_keys);
 
 exports.Worker = Worker;
 exports.default = EntityManager;
+
+var _moment = require('moment');
+
+var _moment2 = _interopRequireDefault(_moment);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1094,11 +1097,10 @@ function Worker(entities, model) {
 
 // TODO: gestion pagination
 // TODO: Gestion status requêtes (sauvegarde timestamp + résultat de chaque dernière requete)
-function EntityManager(entityModel, backendLinks, customMethods) {
+function EntityManager(entityModel, tasks, customMethods) {
 	var _this2 = this;
 
 	this.model = entityModel;
-	this.backend = backendLinks;
 
 	this.entities = [];
 	this.worker = new Worker(this.entities, entityModel);
@@ -1107,76 +1109,78 @@ function EntityManager(entityModel, backendLinks, customMethods) {
 		this[name] = customMethods[name].bind(this);
 	}
 
-	this.has = function (query) {
+	this.tasks = {
+		InsertEntity: {
+			params: ['entity', 'insertMode'],
+			handler: function handler(entity, insertMode) {
+				if (!insertMode || insertMode == 'append') return this.worker.append(entity);
+				return this.worker.prepend(entity);
+			}
+		},
+
+		DeleteEntity: {
+			params: ['id'],
+			handler: function handler(id) {
+				return _this2.worker.delete(id);
+			}
+		},
+
+		UpdateEntity: {
+			params: ['update'],
+			handler: function handler(update) {
+				return _this2.worker.update(update);
+			}
+		}
+	};
+
+	for (var name in tasks) {
+		this.tasks[name] = tasks[name];
+	}
+
+	this.taskHistory = {};
+	this.get = function (query) {
 		return _this2.worker.find(query);
 	};
 
-	this.fetch = function (id) {
-		var ret = _this2.worker.find({ id: id });
-		if (ret) {
-			return _promise2.default.resolve({ success: true, entity: ret });
+	var entityMgr = this;
+	// Tasks handling
+	this.taskId = function (taskArgs) {
+		var tab = (0, _from2.default)(taskArgs);
+		return tab.slice(0, _this2.tasks[tab[0]].params.length).map(_stringify2.default).join('_');
+	};
+
+	this.task = function (name) {
+		var _this3 = this,
+		    _arguments = arguments;
+
+		var task = this.tasks[name];
+		var result = task.handler.apply(entityMgr, (0, _from2.default)(arguments).slice(1));
+		if (!result.then) {
+			return result;
 		}
-		return _this2.backend.fetchOne({ id: id }).then(function (result) {
-			if (result.success && result.entity) {
-				result.entity = _this2.worker.append(result.entity);
-			}
-			return result;
+		if (task.logging !== false) this.logTask(arguments, { working: true });
+		return result.then(function (ret) {
+			if (task.logging !== false) _this3.logTask(_arguments, { result: ret });
+			return ret;
+		}).catch(function (error) {
+			if (task.logging !== false) _this3.logTask(_arguments, { error: error });
+			throw error;
 		});
-		return _promise2.default.reject(false);
 	};
 
-	this.fetchAll = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee() {
-		return _regenerator2.default.wrap(function _callee$(_context) {
-			while (1) {
-				switch (_context.prev = _context.next) {
-					case 0:
-						return _context.abrupt('return', _this2.backend.fetchAll().then(function (result) {
-							if (result.success && result.entity) {
-								result.entity = _this2.worker.append(result.entity);
-							}
-							return result;
-						}));
-
-					case 2:
-					case 'end':
-						return _context.stop();
-				}
-			}
-		}, _callee, _this2);
-	}));
-
-	this.update = function (query) {
-		return _this2.backend.update(query).then(function (result) {
-			if (result.success && result.entity) {
-				result.entity = _this2.worker.update((0, _extends3.default)({}, query, result.entity));
-			}
-			return result;
-		});
-		return _promise2.default.reject(false);
+	this.logTask = function (taskArgs, data) {
+		var curId = this.taskId(taskArgs);
+		data.date = (0, _moment2.default)();
+		this.taskHistory[curId] = data;
 	};
 
-	this.insert = function (entity, insertMode) {
-		return _this2.backend.insert(entity).then(function (result) {
-			if (result.success && result.entity) {
-				if (!insertMode || insertMode == 'append') result.entity = _this2.worker.append((0, _extends3.default)({}, entity, result.entity));else result.entity = _this2.worker.prepend((0, _extends3.default)({}, entity, result.entity));
-			}
-			return result;
-		});
-		return _promise2.default.reject(false);
-	};
-
-	this.delete = function (id) {
-		return _this2.backend.delete(id).then(function (result) {
-			if (result.success) {
-				_this2.worker.delete(id);
-			}
-			return result;
-		});
-		return _promise2.default.reject(false);
+	this.getLastTask = function (name) {
+		var curId = this.taskId(arguments);
+		return this.taskHistory[curId];
 	};
 }
 
-},{"babel-runtime/core-js/object/keys":36,"babel-runtime/core-js/promise":37,"babel-runtime/helpers/asyncToGenerator":40,"babel-runtime/helpers/extends":41,"babel-runtime/helpers/toConsumableArray":43,"babel-runtime/regenerator":45}],18:[function(require,module,exports){
+},{"babel-runtime/core-js/array/from":32,"babel-runtime/core-js/json/stringify":33,"babel-runtime/core-js/object/keys":36,"babel-runtime/helpers/toConsumableArray":43,"moment":143}],18:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1505,6 +1509,10 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
+var _stringify = require('babel-runtime/core-js/json/stringify');
+
+var _stringify2 = _interopRequireDefault(_stringify);
+
 var _EntityManager = require('./lib/EntityManager');
 
 var _EntityManager2 = _interopRequireDefault(_EntityManager);
@@ -1516,41 +1524,26 @@ var _userModel2 = _interopRequireDefault(_userModel);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 userMgrService.$inject = ['userApiService'];
-
 function userMgrService(userApiService) {
 	return new _EntityManager2.default(_userModel2.default, {
-		fetchOne: function fetchOne(_ref) {
-			// return userApiService.getProfile(id)
+		Login: {
+			params: ['user', 'pwd'],
+			handler: function handler(user, pwd) {
+				var _this = this;
 
-			var id = _ref.id;
-		},
-
-		fetchAll: function fetchAll() {},
-
-		update: function update(entity) {},
-
-		insert: function insert(entity) {},
-
-		delete: function _delete(id) {}
-	}, {
-		login: function login(user, pwd) {
-			var _this = this;
-
-			return userApiService.login(user, pwd).then(function (ret) {
-				if (ret.success) {
-					ret.entity = ret.entity.user;
-					ret.entity = _this.worker.append(ret.entity);
-					_this.myUser = ret.entity;
-				}
-				return ret;
-			});
+				return userApiService.login(user, pwd).then(function (ret) {
+					console.log('out ' + (0, _stringify2.default)(ret));
+					var user = _this.task('InsertEntity', ret.result);
+					_this.myUser = user;
+					return user;
+				});
+			}
 		}
 	});
 }
-
 exports.default = userMgrService;
 
-},{"./lib/EntityManager":17,"./models/userModel":21}],23:[function(require,module,exports){
+},{"./lib/EntityManager":17,"./models/userModel":21,"babel-runtime/core-js/json/stringify":33}],23:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {

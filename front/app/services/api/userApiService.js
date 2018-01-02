@@ -9,12 +9,12 @@ function userService(apiService, $http) {
     return apiService.post('auth', {email, password})
     .then(ret => {
       console.log('got ' + JSON.stringify(ret))
-      if (ret.data)
+      if (ret.data && ret.data.user) {
         return ({
-          success: true,
-          entity: ret.data
-        })
-      return {error: 'Bad login details'}
+          result: ret.data.user
+        })        
+      }
+      throw ret
     })
   }
 }

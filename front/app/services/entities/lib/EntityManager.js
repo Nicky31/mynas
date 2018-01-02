@@ -1,4 +1,6 @@
 'use strict';
+import moment from 'moment'
+
 export function Worker(entities, model) {
 	this.newEntity = datas => {
 		if (Array.isArray(datas))
@@ -61,9 +63,8 @@ export function Worker(entities, model) {
 
 // TODO: gestion pagination
 // TODO: Gestion status requêtes (sauvegarde timestamp + résultat de chaque dernière requete)
-export default function EntityManager(entityModel, backendLinks, customMethods) {
+export default function EntityManager(entityModel, tasks, customMethods) {
 	this.model = entityModel;
-	this.backend = backendLinks;
 
 	this.entities = []
 	this.worker = new Worker(this.entities, entityModel);
@@ -72,67 +73,70 @@ export default function EntityManager(entityModel, backendLinks, customMethods) 
 		this[name] = customMethods[name].bind(this);
 	}
 
-	this.has = query => this.worker.find(query);
+	this.tasks = {
+		InsertEntity: {
+			params: ['entity', 'insertMode'],
+			handler: function(entity, insertMode) {
+				if (!insertMode || insertMode == 'append')
+					return this.worker.append(entity)
+				return this.worker.prepend(entity)
+			}
+		},
 
-	this.fetch = id => {
-		var ret = this.worker.find({id})
-		if (ret) {
-			return (Promise.resolve({success: true, entity: ret}));
+		DeleteEntity: {
+			params: ['id'],
+			handler: (id) => this.worker.delete(id)
+		},
+
+		UpdateEntity: {
+			params: ['update'],
+			handler: update => this.worker.update(update)
 		}
-		return this.backend.fetchOne({id})
-		.then(result => {
-			if (result.success && result.entity) {
-				result.entity = this.worker.append(result.entity);
-			}
-			return (result);
-		});
-		return (Promise.reject(false))
-	};
+	}
 
-	this.fetchAll = async () => {
-		return this.backend.fetchAll()
-		.then(result => {
-			if (result.success && result.entity) {
-				result.entity = this.worker.append(result.entity);
-			}
-			return (result);
-		});
-		return (Promise.reject(false))
-	};
+	for (var name in tasks) {
+		this.tasks[name] = tasks[name]
+	}
 
-	this.update = query => {
-		return this.backend.update(query)
-		.then(result => {
-			if (result.success && result.entity) {
-				result.entity = this.worker.update({...query, ...result.entity})
-			}
-			return (result);
-		});
-		return (Promise.reject(false))
-	};
+	this.taskHistory = {}
+	this.get = query => this.worker.find(query);
 
-	this.insert = (entity, insertMode) => {
-		return this.backend.insert(entity)
-		.then(result => {
-			if (result.success && result.entity) {
-				if (!insertMode ||  insertMode == 'append')
-					result.entity = this.worker.append({...entity, ...result.entity});
-				else
-					result.entity = this.worker.prepend({...entity, ...result.entity});
-			}
-			return (result);
-		});
-		return (Promise.reject(false))
-	};
+	var entityMgr = this
+	// Tasks handling
+	this.taskId = (taskArgs) => {
+		const tab = Array.from(taskArgs)
+		return tab.slice(0, this.tasks[tab[0]].params.length).map(JSON.stringify).join('_')
+	}
 
-	this.delete = id => {
-		return this.backend.delete(id)
-		.then(result => {
-			if (result.success) {
-				this.worker.delete(id);
-			}
-			return (result);
-		});
-		return (Promise.reject(false))
-	};
+	this.task = function(name) {
+		const task = this.tasks[name]
+		var result  = task.handler.apply(entityMgr, Array.from(arguments).slice(1))
+		if (!result.then) {
+			return result
+		}
+		if (task.logging !== false)
+			this.logTask(arguments, {working: true})		
+		return result
+		.then(ret => {
+			if (task.logging !== false)
+				this.logTask(arguments, {result: ret})
+			return ret
+		})
+		.catch(error => {
+			if (task.logging !== false)
+				this.logTask(arguments, {error})
+			throw error
+		})
+	}
+
+	this.logTask = function(taskArgs, data) {
+		const curId = this.taskId(taskArgs)
+		data.date = moment()
+		this.taskHistory[curId] = data
+	}
+
+	this.getLastTask = function(name) {
+		const curId = this.taskId(arguments)
+		return this.taskHistory[curId]
+	}
 }
