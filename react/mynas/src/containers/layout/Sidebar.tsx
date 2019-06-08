@@ -33,7 +33,7 @@ export default class Sidebar extends React.Component {
                         Tools
                     </li>
 
-                    <div ng-repeat="widget in pageWidgets" ng-include="widget.include"></div>
+                    <div id="navbar-widgets"></div>
 
                     <li className="divider"></li>
 

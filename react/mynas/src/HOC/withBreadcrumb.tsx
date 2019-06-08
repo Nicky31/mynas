@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 import { connect } from 'react-redux';
 import ReduxActions from 'actions/';
 
@@ -50,6 +51,17 @@ export default function withBreadcrumb(Component: any) {
             }
         }
 
+        renderSidebarWidgets(children: JSX.Element) {
+            let domElement: HTMLElement = (document as any).getElementById('navbar-widgets')
+            if (!domElement) {
+                return
+            }
+            return ReactDOM.createPortal(
+                children,
+                domElement
+            );
+        }
+
         render() {
             return (
                 <Component
@@ -57,6 +69,7 @@ export default function withBreadcrumb(Component: any) {
                     ref={this.setWrappedRef}
                     pushBreadcrumb={this.pushBreadcrumb}
                     popBreadcrumb={this.popBreadcrumb}
+                    renderSidebarWidgets={this.renderSidebarWidgets}
                 />
             )
         }

@@ -1,0 +1,8 @@
+.sidebar-input, .sidebar-input:focus {
+    margin-left: 20px;
+    width: 60%;
+    background-color: #f5f5f5;
+    border-bottom-left-radius: 0px;
+    border-top-left-radius: 0px;
+    color: #333;
+}
