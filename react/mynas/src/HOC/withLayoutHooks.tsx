@@ -15,7 +15,7 @@ interface IProps {
     global: GlobalReducerShape;
 }
 
-export default function withBreadcrumb(Component: any) {    
+export default function withLayoutHooks(Component: any) {    
     class BreadcrumbWrapper extends React.Component<IProps, {}> {
         wrappedRef?: any;
 

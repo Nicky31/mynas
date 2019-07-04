@@ -3,10 +3,13 @@ import { ReduxActionType } from 'actions';
 
 const initialState = datascheme.allStores();
 
-export default function usersReducer (state: StoresReducerShape = initialState, action: any) {
+export default function usersReducer(
+    state: StoresReducerShape = initialState,
+    action: ActionShape<any>
+) {
     switch (action.type) {
         case ReduxActionType.UPDATE_MODEL_STORE:
-            const { store, storeName } = action as UpdateModelStoreActionShape
+            const { store, storeName } = action.value as UpdateModelStoreActionShape
             return ({
                 ...state,
                 [storeName]: store

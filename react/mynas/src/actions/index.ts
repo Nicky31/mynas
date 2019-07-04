@@ -1,7 +1,7 @@
 import { getStore } from 'lib/store';
 
 class ReduxActionCreator<T={}> {
-    history: T[];
+    history: ActionShape<T>[];
 
     public constructor (public type: ReduxActionType) {
         this.history = [];
@@ -10,18 +10,18 @@ class ReduxActionCreator<T={}> {
         this.dispatch = this.dispatch.bind(this)
     }
 
-    public create(params?: T): T {
-        if (params) {
-            params = {...params, type: this.type}
-        } else {
-            params = {type: this.type} as any as T;
+    public create(value?: T): ActionShape<T> {
+        var action: ActionShape<T> = {
+            date: new Date(),
+            value: value,
+            type: this.type
         }
-        this.history.push({ ...params, __date: new Date() })
-        return params;
+        this.history.push(action)
+        return action;
     }
 
-    public dispatch(params?: T) {
-        return getStore().dispatch(this.create(params))
+    public dispatch(value?: T) {
+        return getStore().dispatch(this.create(value))
     }
 }
 

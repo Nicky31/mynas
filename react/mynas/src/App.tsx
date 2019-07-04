@@ -1,6 +1,4 @@
 import * as React from 'react';
-import { withCookies } from 'react-cookie';
-import { Provider } from 'react-redux';
 import { BrowserRouter as Router, Route } from "react-router-dom";
 
 // Layout
@@ -10,24 +8,36 @@ import LoggedBody from 'containers/layout/LoggedBody';
 // Containers
 import { Dashboard, Files } from 'containers';
 
+// Redux links
+import { connect } from 'react-redux';
+import { restoreSession, login, destroySession } from 'actions/globalActions';
+
+const mapProps = {
+  restoreSession,
+  destroySession,
+  login
+}
+const mapState = ({ global } : { global: GlobalReducerShape }) => ({
+  global
+})
+
 interface IProps {
-  cookies: any;
-  store: any;
+  restoreSession: () => any;
+  global: GlobalReducerShape;
+  login: (params: LoginRequestShape) => any;
+  destroySession: () => any;
 }
 
 class App extends React.Component<IProps, {}> {
 
-  public onLogin = (email: string, password: string) => {
-    console.log(email + ' / ' + password)
-    return Promise.reject("invalid ids")
+  componentDidMount() {
+    this.props.restoreSession()
   }
 
-  public onLogout = () => {
-    console.log('LOGOUT ')
-  }
+  public onLogin = (email: string, password: string) => this.props.login({email, password})
 
   public render() {
-    const user = {"name": "Martin"} //this.props.cookies.get('user')
+    const user = this.props.global.user
     if (!user) {
       return (
         <Login onLogin={this.onLogin} />
@@ -35,16 +45,14 @@ class App extends React.Component<IProps, {}> {
     }
     
     return (
-    <Provider store={this.props.store}>
     <Router>
-        <LoggedBody user={user} onLogout={this.onLogout}>
-          <Route path="/" exact component={Dashboard} />
-          <Route path="/files/" component={Files} />
-        </LoggedBody>
+      <LoggedBody user={user} onLogout={this.props.destroySession}>
+        <Route path="/" exact component={Dashboard} />
+        <Route path="/files/" component={Files} />
+      </LoggedBody>
     </Router>      
-    </Provider>
     )
   }
 }
 
-export default withCookies(App);
+export default connect(mapState, mapProps)(App);

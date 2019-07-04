@@ -1,5 +1,6 @@
 // Our custom data model structures
 interface UserModelShape {
+    email: string;
     name: string;
 }
 
@@ -16,6 +17,14 @@ interface GlobalReducerShape {
 }
 
 // Redux action objects
+interface ActionShape<T> {
+    type: ReduxActionType;
+    value?: T;
+    date: Date
+}
+
+type UpdateUserActionShape = UserModelShape
+
 interface UpdateModelStoreActionShape {
     storeName: string;
     store: DataStore;
@@ -25,6 +34,8 @@ interface BreadcrumbShape {
     title: string;
     componentState: object; 
 }
+
+type PushBreadcrumbActionShape = BreadcrumbShape
 
 interface PopBreadcrumbActionShape {
     index?: number;

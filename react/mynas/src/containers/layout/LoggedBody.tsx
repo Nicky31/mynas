@@ -1,10 +1,18 @@
 import * as React from "react";
-import { connect } from "react-redux";
 import { withRouter, RouteComponentProps } from "react-router";
+
+// Layout components
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import Footer from './Footer';
 import ReduxActions from "actions";
+
+// Redux links
+import { connect } from "react-redux";
+const mapState = ({ global } : {global: GlobalReducerShape}) => ({ global })
+const mapProps = {
+    popBreadcrumb: ReduxActions.POP_BREADCRUMB.create
+}
 
 interface IProps {
     children: JSX.Element[];
@@ -65,11 +73,6 @@ class LoggedBody extends React.Component<IProps & RouteComponentProps<any>, {}> 
         </div>            
         )
     }
-}
-
-const mapState = ({ global } : {global: GlobalReducerShape}) => ({ global })
-const mapProps = {
-    popBreadcrumb: ReduxActions.POP_BREADCRUMB.create
 }
 
 export default connect(mapState, mapProps)(withRouter(LoggedBody))

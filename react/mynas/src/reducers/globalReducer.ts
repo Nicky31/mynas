@@ -1,3 +1,4 @@
+
 import { ReduxActionType } from '../actions';
 
 const initialState = {
@@ -5,15 +6,22 @@ const initialState = {
     breadcrumb: []
 };
 
-export default function globalReducer (state: GlobalReducerShape = initialState, action: any) {
-    var { type, ...params } = action
+export default function globalReducer (
+    state: GlobalReducerShape = initialState,
+    action: ActionShape<any>
+) {
+    switch (action.type) {
+        case ReduxActionType.UPDATE_USER:
+            const user: UpdateUserActionShape = action.value
+            return ({ ...state, user })
 
-    switch (type) {
         case ReduxActionType.PUSH_BREADCRUMB:
-            return ({...state, breadcrumb: [...state.breadcrumb, params]})
+            const breadcrumb: PushBreadcrumbActionShape = action.value
+            return ({...state, breadcrumb: [...state.breadcrumb, breadcrumb]})
 
         case ReduxActionType.POP_BREADCRUMB:
-            var sliceEnd = typeof params.index === 'undefined' ? state.breadcrumb.length - 1 : params.index + 1
+            const { index } : PopBreadcrumbActionShape = action.value || {}
+            const sliceEnd = typeof index === 'undefined' ? state.breadcrumb.length - 1 : index + 1
             return ({...state, breadcrumb: state.breadcrumb.slice(0, sliceEnd)})
 
     }

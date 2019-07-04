@@ -22,7 +22,7 @@ class Login extends React.Component<IProps, IState> {
     e.preventDefault()
     const { email, password } = this.state
     this.props.onLogin(email, password)
-    .catch((error: string) => {
+    .catch(({ error }: {error: string}) => {
       this.setState({error})
     })
   }
