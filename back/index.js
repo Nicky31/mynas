@@ -25,7 +25,7 @@ const connectMongo = require('./mongo-connector');
 	app.use(fileUpload()) // Parse input file uploads to req object (req.files.[fieldname])
 
 	const corsOptions = {
-		origin: 'http://localhost:2000',
+		origin: 'http://localhost:3001',
 		credentials: true,
   		"methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
   		"allowedHeaders": "Content-Type,Accept",
@@ -35,15 +35,20 @@ const connectMongo = require('./mongo-connector');
 
 	app.use('/auth', async (req, res) => {
 		if (!req.body || !req.body.email || !req.body.password)
-			return res.json({error: 'Auth requires email and password !'})
+			return res.status(400).json({error: 'Auth requires email and password !'})
   		const user = await mongo.Users.findOne({email: req.body.email})
   		if (user && req.body.password == user.password) {
   			delete user.password
-  			const expiresIn = (60 * 60 * 24 * 180)
-  			res.cookie('token', jwt.sign(user, config.auth_secret, { expiresIn }), { maxAge: (expiresIn * 1000), httpOnly: true})
+			const expiresIn = (60 * 60 * 24 * 180)
+			const token = jwt.sign(user, config.auth_secret, { expiresIn })
+  			res.cookie('token', token, {
+				  maxAge: (expiresIn * 1000),
+				  httpOnly: true,
+				  domain: '127.0.0.1'
+			})
     		return res.json({ user })
   		}
-  		return res.json({error: 'Bad credentials'})
+  		return res.status(400).json({error: 'Bad credentials'})
 	});
 
 	app.use((req, res, next) => {
