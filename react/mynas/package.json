@@ -10,6 +10,7 @@
     "@types/react-dom": "16.8.4",
     "@types/react-redux": "^7.0.9",
     "@types/react-router-dom": "^4.3.3",
+    "js-cookie": "^2.2.0",
     "model-graph": "^0.2.5",
     "react": "^16.8.6",
     "react-cookie": "^4.0.0",

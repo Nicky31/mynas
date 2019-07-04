@@ -3,10 +3,18 @@ import { FilesSidebarWidgets } from 'components';
 
 // Redux links
 import { connect } from 'react-redux';
-import { upload } from 'actions/fileActions';
+import {
+    upload,
+    fetchFiles,
+    createFolder,
+    deleteFiles
+} from 'actions/fileActions';
 
 const mapProps = {
-  upload
+  upload,
+  fetchFiles,
+  createFolder,
+  deleteFiles
 }
 const mapState = ({ global } : { global: GlobalReducerShape }) => ({
   global
@@ -17,12 +25,20 @@ interface IProps {
     popBreadcrumb: () => void;
     renderSidebarWidgets: (elem: JSX.Element) => void;
     upload: (params: UploadRequestShape) => void;
+    fetchFiles: (path?: FilePathShape) => Promise<FileShape[]>;
+    createFolder: (name: string, path: FilePathShape) => Promise<FileShape>;
+    deleteFiles: (fileIds: string[]) => void;
 }
 
 class Files extends React.Component<IProps, {}> {
     BASE_BREADCRUMB = "Files"
     state = {
-        counter: 0
+        counter: 0,
+        path: ['/']
+    }
+
+    componentDidMount() {
+        this.fetchCurrentFolder()
     }
 
     onFileUpload = (file: File[]) => {
@@ -34,8 +50,19 @@ class Files extends React.Component<IProps, {}> {
         })
     }
 
+    fetchCurrentFolder = () => {
+        this.props.fetchFiles(this.state.path)
+        .then((ret: any) => {
+            console.log("fetched", ret)
+        })
+    }
+
     onCreateFolder = (folder: string) => {
         console.log('creating folder ' + folder)
+        this.props.createFolder(folder, this.state.path)
+        .then((ret: any) => {
+            console.log('created folder', ret)
+        })
     }
 
     render() {

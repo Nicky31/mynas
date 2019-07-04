@@ -4,6 +4,19 @@ interface UserModelShape {
     name: string;
 }
 
+type FilePathShape = string[]
+
+interface FileShape {
+    id: string;
+    filename: string;
+    realPath: string;
+    userPath: string;
+    mime: string;
+    size: number;
+    updatedAt: string;
+    directory: boolean;
+}
+
 // Reducers 
 interface StoresReducerShape {
     global: DataStore;

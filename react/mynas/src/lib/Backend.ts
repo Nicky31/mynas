@@ -20,6 +20,8 @@ export class Backend {
     }
 
     graphql(data: object) {
+		if (typeof data != 'object')
+			data = { query: data }        
         return this.post('graphql', data)
     }
 
