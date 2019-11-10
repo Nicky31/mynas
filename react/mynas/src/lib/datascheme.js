@@ -7,7 +7,7 @@ const datascheme = new DataScheme(
         files: {}
     },
     
-	{ idAttribute: 'id' }
+	{ idAttribute: '_id' }
 );
 
 

@@ -9,7 +9,7 @@ export default function usersReducer(
 ) {
     switch (action.type) {
         case ReduxActionType.UPDATE_MODEL_STORE:
-            const { store, storeName } = action.value as UpdateModelStoreActionShape
+            const { store, storeName } = action as (ActionShape<any> & UpdateModelStoreActionShape)
             return ({
                 ...state,
                 [storeName]: store
