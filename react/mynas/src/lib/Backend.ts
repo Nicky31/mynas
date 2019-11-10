@@ -20,8 +20,8 @@ export class Backend {
     }
 
     graphql(data: object) {
-		if (typeof data != 'object')
-			data = { query: data }        
+        if (typeof data != 'object')
+            data = { query: data }        
         return this.post('graphql', data)
     }
 
@@ -31,10 +31,13 @@ export class Backend {
             method: 'POST',
             body: JSON.stringify(body),
             credentials: 'include',
+            // credentials: 'same-origin',
             ...params
         })
         .then((response) => {
-          if ((response.status === 200 || response.status === 201)) {
+          if (response.status === 401) {
+            throw "Unauthorized call"
+          } else if ((response.status === 200 || response.status === 201)) {
             return response.json();
           } else {
             return response.json().then((error)=>{

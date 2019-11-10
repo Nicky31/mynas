@@ -6,10 +6,10 @@ export function login(params: LoginRequestShape) {
     return {
         fetch: () => backend.login(params)
         .then((ret: any) => {
-            console.log("connected with ", ret)
-            Cookies.set('user', ret)
-            ReduxActions.UPDATE_USER.dispatch(ret)
-            return ret
+            console.log("connected with ", ret.user)
+            Cookies.set('user', ret.user)
+            ReduxActions.UPDATE_USER.dispatch(ret.user)
+            return ret.user
         }),
         outputStore: 'users'
     }
@@ -18,8 +18,7 @@ export function login(params: LoginRequestShape) {
 export function restoreSession() {
     return {
         fetch: () => {
-            var user = Cookies.get('user')
-            console.log(user)
+            var user = JSON.parse(Cookies.get('user'))
             ReduxActions.UPDATE_USER.dispatch(user)
             return user
         },

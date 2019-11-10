@@ -66,7 +66,7 @@ export default function withLayoutHooks(Component: any) {
             return (
                 <Component
                     {...this.props}
-                    ref={this.setWrappedRef}
+                    setRef={this.setWrappedRef}
                     pushBreadcrumb={this.pushBreadcrumb}
                     popBreadcrumb={this.popBreadcrumb}
                     renderSidebarWidgets={this.renderSidebarWidgets}

@@ -28,6 +28,7 @@ interface IProps {
     fetchFiles: (path?: FilePathShape) => Promise<FileShape[]>;
     createFolder: (name: string, path: FilePathShape) => Promise<FileShape>;
     deleteFiles: (fileIds: string[]) => void;
+    setRef: (el: React.Component) => void;
 }
 
 class Files extends React.Component<IProps, {}> {
@@ -38,7 +39,12 @@ class Files extends React.Component<IProps, {}> {
     }
 
     componentDidMount() {
+        // TODO Cache this
+        console.log("fetch files")
         this.fetchCurrentFolder()
+        if (this.props.setRef) {
+            this.props.setRef(this)
+        }
     }
 
     onFileUpload = (file: File[]) => {
