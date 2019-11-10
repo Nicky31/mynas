@@ -38,14 +38,14 @@ const bcrypt = require('bcrypt');
 		if (!req.body || !req.body.email || !req.body.password)
 			return res.status(400).json({error: 'Auth requires email and password !'})
 		const user = await mongo.Users.findOne({email: req.body.email})
-		if (bcrypt.compareSync(req.body.password, user.password)) {
+		if (user && bcrypt.compareSync(req.body.password, user.password)) {
   			delete user.password
 			const expiresIn = (60 * 60 * 24 * 180)
 			const token = jwt.sign(user, config.auth_secret, { expiresIn })
   			res.cookie('token', token, {
 				  maxAge: (expiresIn * 1000),
 				  httpOnly: true,
-				  domain: '127.0.0.1'
+				//   domain: 'localhost'
 			})
     		return res.json({ user })
   		}
