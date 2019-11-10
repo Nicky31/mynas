@@ -22,7 +22,7 @@ function UserService({Users}) {
 	this.createUser = async data => {
 		const check = await this.findUsers({email: data.credentials.email})
 		if (check.length) {
-			throw 'E-mail already existant'
+			throw 'E-mail already existing'
 		}
 		const newUser = {
 			name: data.name,

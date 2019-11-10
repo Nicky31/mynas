@@ -10,6 +10,7 @@ const { graphqlExpress, graphiqlExpress } = require('apollo-server-express');
 const schema = require('./schema');
 const Services = require('./services').default
 const connectMongo = require('./mongo-connector');
+const bcrypt = require('bcrypt');
 
 (async function() {
 	var mongo = await connectMongo()
@@ -36,8 +37,8 @@ const connectMongo = require('./mongo-connector');
 	app.use('/auth', async (req, res) => {
 		if (!req.body || !req.body.email || !req.body.password)
 			return res.status(400).json({error: 'Auth requires email and password !'})
-  		const user = await mongo.Users.findOne({email: req.body.email})
-  		if (user && req.body.password == user.password) {
+		const user = await mongo.Users.findOne({email: req.body.email})
+		if (bcrypt.compareSync(req.body.password, user.password)) {
   			delete user.password
 			const expiresIn = (60 * 60 * 24 * 180)
 			const token = jwt.sign(user, config.auth_secret, { expiresIn })
