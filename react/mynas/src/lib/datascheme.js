@@ -2,12 +2,14 @@ import { DataScheme } from 'model-graph';
 
 const datascheme = new DataScheme(
 	{
-		users: {},
+		users: {
+			idAttribute: '_id'
+		},
 
         files: {}
     },
     
-	{ idAttribute: '_id' }
+	{ idAttribute: 'id' }
 );
 
 
